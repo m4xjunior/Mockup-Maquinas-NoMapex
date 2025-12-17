@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import React from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mockup Máquinas NoMapex",
-  description: "Aplicação Next.js com React",
+  title: "Monitor de Producción - NoMapex",
+  description: "Sistema de monitoreo de producción en tiempo real para máquinas industriales",
 };
 
 export default function RootLayout({
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        {children}
+      </body>
     </html>
   );
 }
