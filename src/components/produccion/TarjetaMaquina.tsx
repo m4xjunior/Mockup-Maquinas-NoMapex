@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Maquina, Operario } from '@/types/produccion';
 import { BadgeEstado } from './BadgeEstado';
 import { InfoOperario } from './InfoOperario';
@@ -10,7 +10,7 @@ import { FormularioEdicionPiezas } from './FormularioEdicionPiezas';
 import { ModalOperario } from './ModalOperario';
 import { ModalRegistroParo } from './ModalRegistroParo';
 import { ModalNovoOperario } from './ModalNovoOperario';
-import { ChevronDown, Pencil, UserPlus, AlertOctagon, Play, Plus } from 'lucide-react';
+import { ChevronDown, Pencil, UserPlus, AlertOctagon, Play, Plus, User, FileText, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -59,6 +59,11 @@ export function TarjetaMaquina({
   const [modalOperarioAbierto, setModalOperarioAbierto] = useState(false);
   const [modalNovoOperarioAbierto, setModalNovoOperarioAbierto] = useState(false);
   const [modalParoAbierto, setModalParoAbierto] = useState(false);
+  const [montado, setMontado] = useState(false);
+
+  useEffect(() => {
+    setMontado(true);
+  }, []);
 
   const parosActivos = obtenerParosActivos(maquina.id);
   const tieneParoActivo = parosActivos.length > 0;
@@ -156,7 +161,8 @@ export function TarjetaMaquina({
     <div
       id={`maquina-${maquina.id}`}
       className={cn(
-        'overflow-hidden rounded-lg border border-l-4 bg-white shadow-sm transition-shadow hover:shadow-md',
+        'overflow-hidden rounded-2xl border border-l-4 bg-white shadow-sm transition-all hover:shadow-md',
+        estaExpandida ? 'w-[1042px]' : 'w-[155px] h-[62px]',
         coloresBorde[maquina.estado],
         className
       )}
@@ -164,51 +170,87 @@ export function TarjetaMaquina({
       {/* Header - Siempre visible */}
       <button
         onClick={onToggleExpansion}
-        className="w-full px-4 py-3 text-left transition-colors hover:bg-gray-50"
+        className={cn(
+          "w-full text-left transition-colors hover:bg-gray-50",
+          estaExpandida ? "px-4 py-3" : "h-full px-3 py-2"
+        )}
         aria-expanded={estaExpandida}
         aria-controls={`detalles-${maquina.id}`}
       >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <BadgeEstado estado={maquina.estado} size="sm" />
-            <div className="min-w-0">
-              <h3 className="truncate text-lg font-semibold">
-                {maquina.nombre}
-              </h3>
-              <p className="text-sm text-muted-foreground">{maquina.tipo}</p>
+        <div className={cn(
+          "flex items-center justify-between gap-2",
+          estaExpandida ? "" : "h-full"
+        )}>
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            {!estaExpandida && <BadgeEstado estado={maquina.estado} size="sm" className="shrink-0" />}
+            <div className="min-w-0 flex-1">
+              <div className={cn(
+                "flex items-baseline gap-1.5",
+                estaExpandida ? "" : "flex-col justify-center h-full"
+              )}>
+                <h3 className={cn(
+                  "truncate font-black text-slate-900 uppercase leading-none",
+                  estaExpandida ? "text-xl" : "text-[14px]"
+                )}>
+                  {maquina.nombre}
+                </h3>
+                {estaExpandida ? (
+                  <span className="text-xs font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                    {maquina.tipo}
+                  </span>
+                ) : (
+                  maquina.ordenFabricacion && (
+                    <p className="text-[10px] font-bold text-emerald-700 truncate leading-none mt-1">
+                      OF: {maquina.ordenFabricacion.numero.split('-').pop()}
+                    </p>
+                  )
+                )}
+              </div>
+              {estaExpandida && maquina.ordenFabricacion && (
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <FileText className="h-3 w-3 text-emerald-600" />
+                  <p className="text-sm font-bold text-emerald-700 truncate">
+                    OF: {maquina.ordenFabricacion.numero}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Botones de paro */}
-            {maquina.estado === 'activa' && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 gap-1.5 border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100 hover:text-red-800"
-                onClick={handleAbrirModalParo}
-              >
-                <AlertOctagon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline text-xs font-medium">Paro</span>
-              </Button>
-            )}
+          <div className="flex items-center gap-2 shrink-0">
+            {estaExpandida && (
+              <>
+                {/* Botones de paro */}
+                {maquina.estado === 'activa' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 gap-1.5 border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100 hover:text-red-800"
+                    onClick={handleAbrirModalParo}
+                  >
+                    <AlertOctagon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline text-xs font-medium">Paro</span>
+                  </Button>
+                )}
 
-            {maquina.estado === 'detenida' && tieneParoActivo && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 gap-1.5 border-emerald-200 bg-emerald-50 px-3 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
-                onClick={handleFinalizarParo}
-              >
-                <Play className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline text-xs font-medium">Reanudar</span>
-              </Button>
+                {maquina.estado === 'detenida' && tieneParoActivo && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 gap-1.5 border-emerald-200 bg-emerald-50 px-3 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+                    onClick={handleFinalizarParo}
+                  >
+                    <Play className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline text-xs font-medium">Reanudar</span>
+                  </Button>
+                )}
+              </>
             )}
 
             <ChevronDown
               className={cn(
-                'h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200',
-                estaExpandida && 'rotate-180'
+                'shrink-0 text-muted-foreground transition-transform duration-200',
+                estaExpandida ? 'h-5 w-5 rotate-180' : 'h-3 w-3'
               )}
             />
           </div>
@@ -311,10 +353,10 @@ export function TarjetaMaquina({
               {/* Última actualización */}
               <div className="pt-2 text-xs text-muted-foreground">
                 Última actualización:{' '}
-                {maquina.ultimaActualizacion.toLocaleTimeString('es-ES', {
+                {montado ? maquina.ultimaActualizacion.toLocaleTimeString('es-ES', {
                   hour: '2-digit',
                   minute: '2-digit',
-                })}
+                }) : '--:--'}
               </div>
             </div>
           </motion.div>

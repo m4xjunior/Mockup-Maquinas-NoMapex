@@ -44,9 +44,7 @@ export const GanttProvider: FC<GanttProviderProps> = ({
     }));
   });
 
-  const setScrollX = () => {
-    // Empty function - scrollX state is not used
-  };
+  const [scrollX, setScrollX] = useState(0);
 
   const handleScroll = useMemo(
     () =>

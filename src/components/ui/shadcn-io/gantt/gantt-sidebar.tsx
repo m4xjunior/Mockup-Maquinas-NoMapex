@@ -68,3 +68,5 @@ export const GanttSidebarItem: FC<GanttSidebarItemProps> = ({
     </div>
   </button>
 );
+
+

@@ -59,7 +59,7 @@ export function InfoOrdenFabricacion({
           </p>
         </div>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wide text-green-600">
             Meta
           </p>
           <p className="mt-1 text-sm font-medium">

@@ -243,10 +243,15 @@ export type GanttTodayProps = {
 };
 
 export const GanttToday: FC<GanttTodayProps> = ({ className }) => {
+  const [montado, setMontado] = useState(false);
+  useEffect(() => {
+    setMontado(true);
+  }, []);
   const label = 'Today';
   const date = useMemo(() => new Date(), []);
   const gantt = useContext(GanttContext);
-  if (!gantt) return null;
+
+  if (!gantt || !montado) return null;
 
   const differenceIn = useMemo(() => getDifferenceIn(gantt.range), [gantt.range]);
   const timelineStartDate = useMemo(

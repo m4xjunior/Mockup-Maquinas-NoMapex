@@ -115,6 +115,11 @@ const sidebarItems: SidebarItem[] = [
 
 export default function Home() {
   const ultimaActualizacion = useAtomValue(ultimaActualizacionAtom);
+  const [montado, setMontado] = useState(false);
+
+  useEffect(() => {
+    setMontado(true);
+  }, []);
   const agregarMaquina = useSetAtom(agregarMaquinaAtom);
   const asignarOrdenAMaquina = useSetAtom(asignarOrdenAMaquinaAtom);
   const actualizarOperario = useSetAtom(actualizarOperarioAtom);
@@ -306,11 +311,11 @@ export default function Home() {
                     Última actualización
                   </p>
                   <p className="text-sm font-medium text-gray-900">
-                    {ultimaActualizacion.toLocaleTimeString('es-ES', {
+                    {montado ? ultimaActualizacion.toLocaleTimeString('es-ES', {
                       hour: '2-digit',
                       minute: '2-digit',
                       second: '2-digit',
-                    })}
+                    }) : '--:--:--'}
                   </p>
                 </div>
               </div>
@@ -358,15 +363,15 @@ export default function Home() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6 lg:flex-row">
           <aside className="lg:w-72">
-            <div className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+            <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm w-[175px] h-[62px] flex flex-col justify-center items-center">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
                 Puestos
               </p>
-              <p className="text-base text-gray-600">
-                Indicadores de las células solicitadas
+              <p className="text-[11px] font-semibold text-gray-900 leading-tight">
+                Indicadores de células
               </p>
             </div>
-            <div className="mt-4 space-y-4">
+            <div className="mt-4 flex flex-wrap gap-3">
               {sidebarItems.map((item) => {
                 const accent = accentStyles[item.accent];
                 const Icon = item.icon;
@@ -374,33 +379,29 @@ export default function Home() {
                   <div
                     key={item.id}
                     className={cn(
-                      'rounded-3xl border bg-white p-5 shadow-sm hover:shadow-md transition-shadow',
+                      'rounded-2xl border bg-white p-3 shadow-sm hover:shadow-md transition-shadow w-[175px] h-[62px] flex flex-col justify-center items-center overflow-hidden',
                       accent.border
                     )}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            'flex h-11 w-11 items-center justify-center rounded-2xl border',
-                            accent.text,
-                            accent.border
-                          )}
-                        >
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-gray-500">
-                            {item.label}
-                          </p>
-                          <p className="text-sm font-semibold text-gray-900">{item.descripcion}</p>
-                        </div>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border',
+                          accent.text,
+                          accent.border
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
                       </div>
-                      <span className={cn('rounded-[5px] px-1.5 py-[7px] text-xs font-semibold h-[33px] w-[71px] flex flex-col justify-start items-center m-0', accent.pill)}>
-                        En foco
-                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 truncate">
+                          {item.label}
+                        </p>
+                        <p className="text-[11px] font-semibold text-gray-900 truncate leading-tight">
+                          {item.descripcion}
+                        </p>
+                      </div>
                     </div>
-                    <p className="mt-3 text-sm text-gray-600">{item.meta}</p>
                   </div>
                 );
               })}
@@ -445,6 +446,7 @@ export default function Home() {
         }}
         accionDeshabilitada={accionLoginDeshabilitada}
         estaCargando={cargandoMaquinas}
+        operarios={operarios}
       />
     </div>
   );

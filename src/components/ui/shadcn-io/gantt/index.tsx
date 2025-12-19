@@ -224,3 +224,5 @@ export const Example = () => {
     </GanttProvider>
   );
 };
+
+

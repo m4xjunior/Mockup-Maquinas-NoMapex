@@ -5,22 +5,22 @@ export const operarios: Operario[] = [
   {
     id: '1',
     nombre: 'Juan García',
-    codigo: 'OP-001',
+    codigo: '001',
   },
   {
     id: '2',
     nombre: 'María López',
-    codigo: 'OP-002',
+    codigo: '002',
   },
   {
     id: '3',
     nombre: 'Carlos Rodríguez',
-    codigo: 'OP-003',
+    codigo: '003',
   },
   {
     id: '4',
     nombre: 'Ana Martínez',
-    codigo: 'OP-004',
+    codigo: '004',
   },
 ];
 
@@ -117,8 +117,8 @@ export const maquinasMock: Maquina[] = [
   },
   {
     id: 'm3',
-    nombre: 'TORNO5',
-    tipo: 'Torno CNC',
+    nombre: 'TBE30',
+    tipo: 'BT3.4 Turbo',
     estado: 'detenida',
     operario: null, // Sin operario asignado
     ordenFabricacion: null,
@@ -127,7 +127,7 @@ export const maquinasMock: Maquina[] = [
   },
   {
     id: 'm4',
-    nombre: 'FRES2',
+    nombre: 'RAPID',
     tipo: 'Fresadora',
     estado: 'mantenimiento',
     operario: operarios[2],
@@ -147,12 +147,32 @@ export const maquinasMock: Maquina[] = [
   },
   {
     id: 'm6',
-    nombre: 'CNC7',
-    tipo: 'CNC Router',
+    nombre: 'RAPID',
+    tipo: 'BT3.4 Turbo',
     estado: 'activa',
     operario: operarios[0],
     ordenFabricacion: ordenesFabricacion[3],
     contadorPiezas: contadores[3],
+    ultimaActualizacion: new Date(),
+  },
+  {
+    id: 'm7',
+    nombre: 'LECTRA',
+    tipo: 'Corte',
+    estado: 'activa',
+    operario: null,
+    ordenFabricacion: null,
+    contadorPiezas: null,
+    ultimaActualizacion: new Date(),
+  },
+  {
+    id: 'm8',
+    nombre: 'LIMPIEZA PLANTA',
+    tipo: 'Limpieza',
+    estado: 'activa',
+    operario: null,
+    ordenFabricacion: null,
+    contadorPiezas: null,
     ultimaActualizacion: new Date(),
   },
 ];
@@ -168,10 +188,12 @@ export const obtenerMaquinas = async (): Promise<Maquina[]> => {
 export const ordenesDisponiblesPorMaquina: Record<string, OrdenFabricacion[]> = {
   m1: [ordenesFabricacion[0], ordenesFabricacion[1]],
   m2: [ordenesFabricacion[1], ordenesFabricacion[3], ordenesFabricacion[0]],
-  m3: [ordenesFabricacion[2], ordenesFabricacion[0]],
+  m3: [], // TBE30 sin OFs para probar el bloqueo
   m4: [ordenesFabricacion[3], ordenesFabricacion[2]],
   m5: [ordenesFabricacion[2], ordenesFabricacion[1], ordenesFabricacion[3]],
   m6: [ordenesFabricacion[3], ordenesFabricacion[0], ordenesFabricacion[2]],
+  m7: [], // LECTRA sin OFs para probar el bloqueo
+  m8: [ordenesFabricacion[2], ordenesFabricacion[3]],
 };
 
 export const obtenerOrdenesDisponibles = (

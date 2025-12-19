@@ -99,7 +99,7 @@ export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquina
 
   // Lista de máquinas
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('flex flex-wrap gap-3', className)}>
       {maquinasFiltradas.map((maquina) => (
         <TarjetaMaquina
           key={maquina.id}

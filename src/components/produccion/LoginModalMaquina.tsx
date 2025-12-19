@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Maquina, OrdenFabricacion } from '@/types/produccion';
+import { useState, useEffect, useRef } from 'react';
+import { Maquina, OrdenFabricacion, Operario } from '@/types/produccion';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
   CheckCircle2,
@@ -11,6 +12,13 @@ import {
   ActivitySquare,
   Loader2,
   X,
+  Layers,
+  Truck,
+  RotateCcw,
+  User,
+  FileText,
+  Keypad,
+  UserCheck,
 } from 'lucide-react';
 
 interface LoginModalMaquinaProps {
@@ -19,13 +27,28 @@ interface LoginModalMaquinaProps {
   ordenesPorMaquina: Record<string, OrdenFabricacion[]>;
   maquinaSeleccionada: string | null;
   ordenSeleccionada: string | null;
-  onSeleccionarMaquina: (idMaquina: string) => void;
-  onSeleccionarOrden: (idOrden: string) => void;
+  onSeleccionarMaquina: (idMaquina: string | null) => void;
+  onSeleccionarOrden: (idOrden: string | null) => void;
   onConfirmar: () => void;
   onCerrar?: () => void;
   accionDeshabilitada: boolean;
   estaCargando: boolean;
+  operarios: Operario[]; // Añadimos operarios para validación
 }
+
+const TIPOS_PROCESO = [
+  { id: 'fabricacion', label: 'Fabricación', icon: Factory },
+  { id: 'secuencia', label: 'Secuencia', icon: Layers },
+  { id: 'carretilleros', label: 'Carretilleros', icon: Truck },
+  { id: 'rwk', label: 'RWK', icon: RotateCcw },
+];
+
+const STATS_MOCK: Record<string, { activas: number; ofs: number; op: string }> = {
+  fabricacion: { activas: 5, ofs: 3, op: 'J. García [01]' },
+  secuencia: { activas: 2, ofs: 1, op: 'M. López [02]' },
+  carretilleros: { activas: 4, ofs: 0, op: 'C. Rodríg. [03]' },
+  rwk: { activas: 1, ofs: 1, op: 'A. Mart. [04]' },
+};
 
 export function LoginModalMaquina({
   visible,
@@ -39,17 +62,71 @@ export function LoginModalMaquina({
   onCerrar,
   accionDeshabilitada,
   estaCargando,
+  operarios,
 }: LoginModalMaquinaProps) {
-  if (!visible) return null;
+  const [tipoProcesoSeleccionado, setTipoProcesoSeleccionado] = useState<string | null>('fabricacion');
+  const [montado, setMontado] = useState(false);
+  const [mostrarPin, setMostrarPin] = useState(false);
+  const [pin, setPin] = useState('');
+  const [errorPin, setErrorPin] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ type: 'proceso' | 'maquina' | 'orden', id: string } | null>(null);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!visible || !onCerrar) return;
+    if (mostrarPin && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [mostrarPin]);
+
+  const handleAction = (type: 'proceso' | 'maquina' | 'orden', id: string | null) => {
+    if (!id) {
+      // Deseleccionar
+      if (type === 'proceso') setTipoProcesoSeleccionado(null);
+      if (type === 'maquina') onSeleccionarMaquina(null);
+      if (type === 'orden') onSeleccionarOrden(null);
+      return;
+    }
+
+    // Si es una nueva selección, pedir PIN
+    setPendingAction({ type, id });
+    setPin('');
+    setErrorPin(false);
+    setMostrarPin(true);
+  };
+
+  const confirmarPin = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    
+    // Si no hay PIN o el PIN tiene una longitud mínima, aceptamos cualquier entrada
+    // para que el usuario no se quede bloqueado en el mockup
+    if (pin.length > 0) {
+      if (pendingAction) {
+        if (pendingAction.type === 'proceso') setTipoProcesoSeleccionado(pendingAction.id);
+        if (pendingAction.type === 'maquina') onSeleccionarMaquina(pendingAction.id);
+        if (pendingAction.type === 'orden') onSeleccionarOrden(pendingAction.id);
+      }
+      setMostrarPin(false);
+      setPendingAction(null);
+      setErrorPin(false);
+    } else {
+      setErrorPin(true);
+    }
+  };
+
+  useEffect(() => {
+    setMontado(true);
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onCerrar();
+      if (event.key === 'Escape' && onCerrar) onCerrar();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [visible, onCerrar]);
+  }, [onCerrar]);
+
+  if (!visible) return null;
 
   const ordenesDisponibles: OrdenFabricacion[] = maquinaSeleccionada
     ? ordenesPorMaquina[maquinaSeleccionada] ?? []
@@ -80,7 +157,7 @@ export function LoginModalMaquina({
                 Inicio operativo
               </p>
               <h2 className="mt-2 text-3xl font-semibold text-slate-900">
-                Elige la máquina y la OF activa
+                Elige el puesto y la OF activa
               </h2>
               <p className="mt-2 text-sm text-slate-500">
                 Replique el flujo del panel legado: selecciona el puesto y define qué orden de fabricación se seguirá durante esta sesión.
@@ -99,11 +176,38 @@ export function LoginModalMaquina({
           ) : (
             <div className="space-y-8">
               <section>
-                <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
+                    Paso 1
+                  </p>
+                  <h3 className="text-xl font-semibold text-slate-900">
+                    Selecciona el proceso
+                  </h3>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {TIPOS_PROCESO.map((tipo) => {
+                    const Icon = tipo.icon;
+                    const estaSeleccionado = tipoProcesoSeleccionado === tipo.id;
+
+                    return (
+                      <button
+                        key={tipo.id}
+                        type="button"
+                        onClick={() => handleAction('proceso', estaSeleccionado ? null : tipo.id)}
+                        className={cn(
+                          'flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-emerald-300 hover:shadow-md',
+                          estaSeleccionado && 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
+                        )}
+                      >
+                        <Icon className={cn('h-6 w-6', estaSeleccionado ? 'text-emerald-600' : 'text-slate-400')} />
+                        <span className="text-xs font-bold uppercase tracking-wider">{tipo.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-8 flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
-                      Paso 1
-                    </p>
                     <h3 className="text-xl font-semibold text-slate-900">
                       Elige el equipo
                     </h3>
@@ -116,13 +220,19 @@ export function LoginModalMaquina({
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   {maquinas.map((maquina) => {
                     const estaSeleccionada = maquinaSeleccionada === maquina.id;
+                    const tieneOFs = (ordenesPorMaquina[maquina.id]?.length || 0) > 0;
+
                     return (
                       <button
                         key={maquina.id}
                         type="button"
-                        onClick={() => onSeleccionarMaquina(maquina.id)}
+                        disabled={!tieneOFs}
+                        onClick={() => handleAction('maquina', estaSeleccionada ? null : maquina.id)}
                         className={cn(
-                          'rounded-3xl border border-slate-200 bg-white px-5 py-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200',
+                          'rounded-3xl border border-slate-200 bg-white px-5 py-4 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200',
+                          tieneOFs 
+                            ? 'hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg' 
+                            : 'opacity-50 grayscale-[0.8] bg-slate-50 cursor-not-allowed',
                           estaSeleccionada &&
                             'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-[0_12px_35px_rgba(16,185,129,0.25)]'
                         )}
@@ -131,6 +241,11 @@ export function LoginModalMaquina({
                           <div>
                             <p className="text-sm font-semibold text-slate-900">
                               {maquina.nombre}
+                              {!tieneOFs && (
+                                <span className="ml-2 text-[9px] font-bold uppercase text-red-500 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">
+                                  Sin OF
+                                </span>
+                              )}
                             </p>
                             <p className="text-xs uppercase tracking-wide text-slate-500">
                               {maquina.tipo}
@@ -142,9 +257,30 @@ export function LoginModalMaquina({
                             <Factory className="h-5 w-5 text-slate-400" />
                           )}
                         </div>
-                        <p className="mt-3 text-xs text-slate-500">
-                          Estado actual: {maquina.estado}
-                        </p>
+                        
+                        <div className="mt-4 space-y-2 border-t border-slate-100 pt-3">
+                          <div className="flex items-center gap-2 text-[11px] text-slate-600">
+                            <ActivitySquare className="h-3 w-3 text-emerald-500" />
+                            <span className="font-medium">Actividad:</span>
+                            <span className="capitalize">{maquina.estado}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-[11px] text-slate-600">
+                            <FileText className="h-3 w-3 text-blue-500" />
+                            <span className="font-medium">OF:</span>
+                            <span className="truncate">{maquina.ordenFabricacion?.numero || 'Sin OF activa'}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-[11px] text-slate-600">
+                            <User className="h-3 w-3 text-indigo-500" />
+                            <span className="font-medium">Operario:</span>
+                            <span className="truncate">
+                              {maquina.operario 
+                                ? `${maquina.operario.nombre} [${maquina.operario.codigo}]` 
+                                : 'Sin asignar'}
+                            </span>
+                          </div>
+                        </div>
                       </button>
                     );
                   })}
@@ -173,7 +309,7 @@ export function LoginModalMaquina({
                           <button
                             key={orden.id}
                             type="button"
-                            onClick={() => onSeleccionarOrden(orden.id)}
+                            onClick={() => handleAction('orden', estaSeleccionada ? null : orden.id)}
                             className={cn(
                               'rounded-3xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200',
                               estaSeleccionada &&
@@ -203,7 +339,7 @@ export function LoginModalMaquina({
                               {orden.fechaLimite && (
                                 <span>
                                   Límite:{' '}
-                                  {orden.fechaLimite.toLocaleDateString('es-ES')}
+                                  {montado ? orden.fechaLimite.toLocaleDateString('es-ES') : '--/--/----'}
                                 </span>
                               )}
                             </div>
@@ -243,6 +379,67 @@ export function LoginModalMaquina({
           </footer>
         </div>
       </div>
+
+      {/* Modal de PIN Operario */}
+      {mostrarPin && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl">
+            <div className="mb-6 flex flex-col items-center text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <UserCheck className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Operario</h3>
+              <p className="mt-2 text-sm text-slate-500">
+                Introduce tu código numérico
+              </p>
+            </div>
+
+            <form onSubmit={confirmarPin} className="space-y-4">
+              <div className="relative">
+                <Input
+                  ref={inputRef}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Código"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                  className={cn(
+                    "h-14 text-center text-2xl font-bold tracking-[0.5em] transition-all",
+                    errorPin ? "border-red-500 bg-red-50 text-red-600" : "border-slate-200"
+                  )}
+                />
+                {errorPin && (
+                  <p className="mt-2 text-center text-sm font-medium text-red-500">
+                    Introduce un código válido
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setMostrarPin(false);
+                    setPendingAction(null);
+                  }}
+                  className="h-12 rounded-2xl border-slate-200 text-slate-600"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!pin}
+                  className="h-12 rounded-2xl bg-emerald-600 font-bold text-white hover:bg-emerald-500"
+                >
+                  Confirmar
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
