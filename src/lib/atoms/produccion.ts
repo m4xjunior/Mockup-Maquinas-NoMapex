@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { Maquina, Operario, RegistroParo, MotivoParo, CategoriaParo } from '@/types/produccion';
+import { Maquina, Operario, RegistroParo, MotivoParo, CategoriaParo, OrdenFabricacion, ContadorPiezas } from '@/types/produccion';
 
 // Atom principal con todas las máquinas
 export const maquinasAtom = atom<Maquina[]>([]);
@@ -14,13 +14,13 @@ export const errorAtom = atom<string | null>(null);
 export const ultimaActualizacionAtom = atom<Date>(new Date());
 
 // IDs de las máquinas expandidas (para el accordion)
-export const maquinasExpandidasAtom = atom<Set<string>>(new Set());
+export const maquinasExpandidasAtom = atom<Set<string>>(new Set<string>());
 
 // Atom derivado para toggle de expansión
 export const toggleExpansionAtom = atom(
   null, // No tiene lectura
   (get, set, idMaquina: string) => {
-    const expandidas = new Set(get(maquinasExpandidasAtom));
+    const expandidas = new Set<string>(get(maquinasExpandidasAtom));
     if (expandidas.has(idMaquina)) {
       expandidas.delete(idMaquina);
     } else {
@@ -36,13 +36,13 @@ export const esMaquinaExpandidaAtom = atom((get) => (idMaquina: string) => {
 });
 
 // IDs de las máquinas en modo edición
-export const maquinasEnEdicionAtom = atom<Set<string>>(new Set());
+export const maquinasEnEdicionAtom = atom<Set<string>>(new Set<string>());
 
 // Atom para toggle de modo edición
 export const toggleModoEdicionAtom = atom(
   null,
   (get, set, idMaquina: string) => {
-    const enEdicion = new Set(get(maquinasEnEdicionAtom));
+    const enEdicion = new Set<string>(get(maquinasEnEdicionAtom));
     if (enEdicion.has(idMaquina)) {
       enEdicion.delete(idMaquina);
     } else {

@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,20 @@ import {
   categoriasParo,
   obtenerMotivosPorCategoria,
 } from '@/lib/datos-paros';
-import { AlertCircle } from 'lucide-react';
+import { 
+  AlertCircle, 
+  Wrench, 
+  Package, 
+  Settings2, 
+  Hammer, 
+  Clock, 
+  HelpCircle, 
+  CheckCircle2, 
+  XCircle, 
+  Loader2 
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { motion } from 'motion/react';
 
 interface ModalRegistroParoProps {
   abierto: boolean;
@@ -26,21 +38,17 @@ interface ModalRegistroParoProps {
     categoria: CategoriaParo;
     motivoParo: MotivoParo;
     observaciones: string;
-  }) => void;
+  }) => Promise<void>;
 }
 
-// Colores para las categorías - Solo modo claro
-const coloresCategoria: Record<string, string> = {
-  blue: 'bg-blue-100 text-blue-800 border-blue-300',
-  purple: 'bg-purple-100 text-purple-800 border-purple-300',
-  red: 'bg-red-100 text-red-800 border-red-300',
-  orange: 'bg-orange-100 text-orange-800 border-orange-300',
-  yellow: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  green: 'bg-green-100 text-green-800 border-green-300',
-  gray: 'bg-gray-100 text-gray-800 border-gray-300',
-  pink: 'bg-pink-100 text-pink-800 border-pink-300',
-  indigo: 'bg-indigo-100 text-indigo-800 border-indigo-300',
-  slate: 'bg-slate-100 text-slate-800 border-slate-300',
+// Configuración de iconos por categoría
+const iconosCategoria: Record<string, any> = {
+  averia: Wrench,
+  material: Package,
+  ajustes: Settings2,
+  mantenimiento: Hammer,
+  pausa: Clock,
+  otros: HelpCircle,
 };
 
 export function ModalRegistroParo({
@@ -54,7 +62,9 @@ export function ModalRegistroParo({
   const [motivoSeleccionado, setMotivoSeleccionado] = useState<string>('');
   const [observaciones, setObservaciones] = useState('');
   const [motivosDisponibles, setMotivosDisponibles] = useState<MotivoParo[]>([]);
-  const [errores, setErrores] = useState<Record<string, string>>({});
+  
+  // Estados de feedback
+  const [estado, setEstado] = useState<'idle' | 'cargando' | 'exito' | 'error'>('idle');
 
   // Resetear formulario cuando se abre el modal
   useEffect(() => {
@@ -63,7 +73,7 @@ export function ModalRegistroParo({
       setMotivoSeleccionado('');
       setObservaciones('');
       setMotivosDisponibles([]);
-      setErrores({});
+      setEstado('idle');
     }
   }, [abierto]);
 
@@ -72,161 +82,186 @@ export function ModalRegistroParo({
     if (categoriaSeleccionada) {
       const motivos = obtenerMotivosPorCategoria(categoriaSeleccionada);
       setMotivosDisponibles(motivos);
-      setMotivoSeleccionado(''); // Reset motivo al cambiar categoría
+      setMotivoSeleccionado('');
     } else {
       setMotivosDisponibles([]);
       setMotivoSeleccionado('');
     }
   }, [categoriaSeleccionada]);
 
-  const validarFormulario = (): boolean => {
-    const nuevosErrores: Record<string, string> = {};
-
-    if (!categoriaSeleccionada) {
-      nuevosErrores.categoria = 'Debe seleccionar una categoría';
-    }
-
-    if (!motivoSeleccionado) {
-      nuevosErrores.motivo = 'Debe seleccionar un motivo de paro';
-    }
-
-    setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0;
-  };
-
-  const handleGuardar = () => {
-    if (!validarFormulario()) return;
-
+  const handleGuardar = async () => {
     const categoria = categoriasParo.find((c) => c.id === categoriaSeleccionada);
     const motivo = motivosDisponibles.find((m) => m.id === motivoSeleccionado);
 
     if (!categoria || !motivo) return;
 
-    onGuardar({
-      categoria,
-      motivoParo: motivo,
-      observaciones: observaciones.trim(),
-    });
-
-    onCerrar();
+    setEstado('cargando');
+    
+    try {
+      await onGuardar({
+        categoria,
+        motivoParo: motivo,
+        observaciones: observaciones.trim(),
+      });
+      
+      setEstado('exito');
+      setTimeout(() => {
+        onCerrar();
+      }, 1500);
+    } catch (err) {
+      setEstado('error');
+      setTimeout(() => {
+        setEstado('idle');
+      }, 3000);
+    }
   };
 
   return (
     <Dialog open={abierto} onOpenChange={onCerrar}>
-      <DialogContent className="max-h-[85vh] w-[95vw] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Registrar Paro</DialogTitle>
-          <DialogDescription>
-            Registre el motivo del paro para la máquina{' '}
-            <span className="font-semibold text-foreground">{nombreMaquina}</span>
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-h-[90vh] w-full max-w-full sm:max-w-2xl overflow-y-auto rounded-[32px] p-0 border-none shadow-2xl">
+        {estado === 'idle' || estado === 'cargando' ? (
+          <>
+            <div className="p-8 space-y-6">
+              <DialogHeader>
+                <DialogTitle className="text-3xl font-bold text-slate-900 leading-tight tracking-tight">
+                  ¿Por qué se detuvo la máquina?
+                </DialogTitle>
+                <DialogDescription className="text-lg text-slate-500 mt-2">
+                  Selecciona la causa principal del paro en <span className="font-bold text-slate-900">{nombreMaquina}</span>
+                </DialogDescription>
+              </DialogHeader>
 
-        <div className="space-y-5 py-4">
-          {/* Alert informativo */}
-          <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm">
-            <AlertCircle className="h-4 w-4 shrink-0 text-blue-600 mt-0.5" />
-            <p className="text-blue-800">
-              El paro se iniciará automáticamente al guardar. Puede finalizar el
-              paro más tarde desde el historial.
-            </p>
-          </div>
+              <div className="space-y-8">
+                {/* Selección de categoría con iconos grandes */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {categoriasParo.map((categoria) => {
+                    const Icono = iconosCategoria[categoria.id] || AlertCircle;
+                    const estaSeleccionada = categoriaSeleccionada === categoria.id;
+                    
+                    return (
+                      <button
+                        key={categoria.id}
+                        type="button"
+                        onClick={() => setCategoriaSeleccionada(categoria.id)}
+                        className={cn(
+                          "flex flex-col items-center justify-center gap-3 rounded-3xl border-2 p-5 transition-all",
+                          estaSeleccionada
+                            ? "border-slate-900 bg-slate-900 text-white shadow-xl scale-[1.02]"
+                            : "border-slate-100 bg-white text-slate-600 hover:border-slate-300"
+                        )}
+                      >
+                        <Icono className={cn("h-8 w-8", estaSeleccionada ? "text-white" : "text-slate-400")} />
+                        <span className="font-bold text-sm text-center leading-tight">{categoria.nombre}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-          {/* Selección de categoría */}
-          <div className="space-y-3">
-            <Label htmlFor="categoria" className="text-base font-semibold">
-              Categoría de Paro <span className="text-red-500">*</span>
-            </Label>
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-2">
-              {categoriasParo.map((categoria) => (
-                <button
-                  key={categoria.id}
-                  type="button"
-                  onClick={() => setCategoriaSeleccionada(categoria.id)}
-                  className={`rounded-lg border-2 p-3.5 text-left transition-all hover:shadow-sm ${
-                    categoriaSeleccionada === categoria.id
-                      ? coloresCategoria[categoria.color]
-                      : 'border-gray-200 bg-white hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="font-semibold text-sm leading-tight">{categoria.nombre}</div>
-                  <div className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-                    {categoria.descripcion}
-                  </div>
-                </button>
-              ))}
+                {/* Selección de motivo (solo si hay categoría) */}
+                {categoriaSeleccionada && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-4"
+                  >
+                    <Label htmlFor="motivo" className="text-lg font-bold text-slate-900">
+                      Motivo específico
+                    </Label>
+                    <div className="grid grid-cols-1 gap-2">
+                      {motivosDisponibles.map((motivo) => (
+                        <button
+                          key={motivo.id}
+                          type="button"
+                          onClick={() => setMotivoSeleccionado(motivo.id)}
+                          className={cn(
+                            "flex items-center gap-3 rounded-2xl border-2 px-5 py-4 text-left transition-all",
+                            motivoSeleccionado === motivo.id
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-900 font-bold"
+                              : "border-slate-100 bg-white text-slate-600 hover:border-slate-200"
+                          )}
+                        >
+                          <div className={cn(
+                            "h-5 w-5 rounded-full border-2 flex items-center justify-center",
+                            motivoSeleccionado === motivo.id ? "border-emerald-500 bg-emerald-500" : "border-slate-300"
+                          )}>
+                            {motivoSeleccionado === motivo.id && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                          </div>
+                          <span>{motivo.nombre}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Observaciones (opcional) */}
+                <div className="space-y-3">
+                  <Label htmlFor="observaciones" className="text-lg font-bold text-slate-900">
+                    Notas adicionales <span className="text-slate-400 font-normal">(opcional)</span>
+                  </Label>
+                  <textarea
+                    id="observaciones"
+                    value={observaciones}
+                    onChange={(e) => setObservaciones(e.target.value)}
+                    placeholder="Escribe aquí cualquier detalle importante..."
+                    rows={2}
+                    className="flex w-full rounded-2xl border-2 border-slate-100 bg-white px-5 py-4 text-base shadow-sm transition-all focus:border-slate-900 focus:outline-none resize-none"
+                  />
+                </div>
+              </div>
             </div>
-            {errores.categoria && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3.5 w-3.5" />
-                {errores.categoria}
-              </p>
-            )}
-          </div>
 
-          {/* Selección de motivo */}
-          {categoriaSeleccionada && (
-            <div className="space-y-3">
-              <Label htmlFor="motivo" className="text-base font-semibold">
-                Motivo Específico <span className="text-red-500">*</span>
-              </Label>
-              <select
-                id="motivo"
-                value={motivoSeleccionado}
-                onChange={(e) => setMotivoSeleccionado(e.target.value)}
-                className={`flex h-10 w-full rounded-lg border-2 bg-transparent px-4 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  errores.motivo ? 'border-red-500' : 'border-input'
-                }`}
+            <div className="flex gap-3 p-8 bg-slate-50 rounded-b-[32px] border-t border-slate-100">
+              <Button 
+                variant="outline" 
+                onClick={onCerrar}
+                className="flex-1 h-14 rounded-2xl text-lg font-bold border-slate-200"
+                disabled={estado === 'cargando'}
               >
-                <option value="">Seleccione un motivo</option>
-                {motivosDisponibles.map((motivo) => (
-                  <option key={motivo.id} value={motivo.id}>
-                    {motivo.codigo ? `${motivo.codigo} - ` : ''}
-                    {motivo.nombre}
-                  </option>
-                ))}
-              </select>
-              {errores.motivo ? (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="h-3.5 w-3.5" />
-                  {errores.motivo}
-                </p>
-              ) : (
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  ✓ {motivosDisponibles.length} motivos disponibles en esta categoría
-                </p>
-              )}
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleGuardar} 
+                className={cn(
+                  "flex-[2] h-14 rounded-2xl text-lg font-bold shadow-lg transition-all",
+                  estado === 'cargando' ? "bg-slate-400 cursor-not-allowed" : "bg-slate-900 hover:bg-slate-800"
+                )}
+                disabled={!categoriaSeleccionada || !motivoSeleccionado || estado === 'cargando'}
+              >
+                {estado === 'cargando' ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Registrando...
+                  </>
+                ) : (
+                  'Registrar Paro'
+                )}
+              </Button>
             </div>
-          )}
-
-          {/* Observaciones opcionales */}
-          <div className="space-y-3">
-            <Label htmlFor="observaciones" className="text-base font-semibold">
-              Observaciones (opcional)
-            </Label>
-            <textarea
-              id="observaciones"
-              value={observaciones}
-              onChange={(e) => setObservaciones(e.target.value)}
-              placeholder="Detalles adicionales sobre el paro..."
-              rows={3}
-              className="flex w-full rounded-lg border-2 border-input bg-transparent px-4 py-3 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
-            />
-            <p className="text-xs text-muted-foreground">
-              {observaciones.length}/500 caracteres
-            </p>
+          </>
+        ) : estado === 'exito' ? (
+          <div className="flex flex-col items-center justify-center p-16 space-y-6 text-center bg-white rounded-[32px]">
+            <div className="h-24 w-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center animate-bounce">
+              <CheckCircle2 className="h-14 w-14" />
+            </div>
+            <div>
+              <h3 className="text-3xl font-black text-slate-900">¡Guardado con éxito!</h3>
+              <p className="text-lg text-slate-500 mt-2">El paro ha sido registrado correctamente.</p>
+            </div>
           </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onCerrar}>
-            Cancelar
-          </Button>
-          <Button onClick={handleGuardar} className="gap-2">
-            <AlertCircle className="h-4 w-4" />
-            Registrar Paro
-          </Button>
-        </DialogFooter>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-16 space-y-6 text-center bg-white rounded-[32px]">
+            <div className="h-24 w-24 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+              <XCircle className="h-14 w-14" />
+            </div>
+            <div>
+              <h3 className="text-3xl font-black text-slate-900">Error al guardar</h3>
+              <p className="text-lg text-slate-500 mt-2">Inténtalo de nuevo en unos segundos.</p>
+            </div>
+            <Button onClick={() => setEstado('idle')} className="rounded-full px-8">
+              Reintentar
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

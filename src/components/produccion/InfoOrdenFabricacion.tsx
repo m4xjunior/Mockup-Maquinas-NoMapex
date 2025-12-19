@@ -22,10 +22,10 @@ export function InfoOrdenFabricacion({
         </div>
         <div>
           <p className="text-sm font-medium text-muted-foreground">
-            Sin orden activa
+            Sin trabajo activo
           </p>
           <p className="text-xs text-muted-foreground">
-            Máquina disponible para nueva orden
+            Equipo disponible para nuevo trabajo
           </p>
         </div>
       </div>
@@ -41,7 +41,12 @@ export function InfoOrdenFabricacion({
           <FileText className="h-4 w-4 text-primary" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-lg font-semibold">{ordenFabricacion.numero}</p>
+          <p 
+            style={{ fontFamily: 'SFMono-Regular, Consolas, "Liberation Mono", monospace' }}
+            className="text-lg font-semibold"
+          >
+            {ordenFabricacion.numero}
+          </p>
         </div>
       </div>
 
@@ -54,7 +59,10 @@ export function InfoOrdenFabricacion({
           <p className="mt-1 text-sm font-medium">
             {ordenFabricacion.nombrePieza}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p 
+            style={{ fontFamily: 'SFMono-Regular, Consolas, "Liberation Mono", monospace' }}
+            className="text-xs text-muted-foreground"
+          >
             {ordenFabricacion.numeroPieza}
           </p>
         </div>
@@ -62,7 +70,18 @@ export function InfoOrdenFabricacion({
           <p className="text-xs font-medium uppercase tracking-wide text-green-600">
             Meta
           </p>
-          <p className="mt-1 text-sm font-medium">
+          <p 
+            style={{ 
+              backgroundClip: 'unset', 
+              WebkitBackgroundClip: 'unset', 
+              color: 'rgba(0, 0, 0, 1)', 
+              fontFamily: '__nextjs-Geist', 
+              letterSpacing: '3.7px', 
+              lineHeight: '31px', 
+              fontSize: '18px' 
+            }} 
+            className="mt-1 text-sm font-medium"
+          >
             {ordenFabricacion.cantidadObjetivo} unidades
           </p>
         </div>

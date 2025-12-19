@@ -34,9 +34,41 @@
     --radius: 0.5rem;
   }
 
+  * {
+    /* Prevenir zoom en iPhone y otros dispositivos táctiles */
+    touch-action: manipulation;
+  }
+
+  html {
+    /* Prevenir zoom en inputs en iPhone */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     background-color: white;
     color: hsl(var(--foreground));
+    /* Prevenir scroll horizontal no deseado */
+    overflow-x: hidden;
+  }
+
+  /* Prevenir zoom en inputs en iPhone (mínimo 16px) */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  /* Mejorar responsividad de imágenes */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Prevenir comportamiento de zoom con doble-tap en iPhone */
+  button,
+  a {
+    touch-action: manipulation;
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useContext, useMemo, useState } from 'react';
+import React, { FC, ReactNode, useContext, useMemo, useState, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, useDraggable } from '@dnd-kit/core';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -129,11 +129,11 @@ export type GanttFeatureItemProps = {
 
 export const GanttFeatureItem: FC<GanttFeatureItemProps> = ({
   id,
-  _name,
+  name,
   startAt,
   endAt,
-  _status,
-  _onMove,
+  status,
+  onMove,
   children,
   className,
 }) => {
