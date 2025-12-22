@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Maquina, Operario } from '@/types/produccion';
 import { BadgeEstado } from './BadgeEstado';
 import { InfoOperario } from './InfoOperario';
@@ -34,12 +34,15 @@ interface TarjetaMaquinaProps {
   className?: string;
 }
 
-export function TarjetaMaquina({
+export const TarjetaMaquina = memo(function TarjetaMaquina({
   maquina,
   estaExpandida,
   onToggleExpansion,
   className,
 }: TarjetaMaquinaProps) {
+  // #region agent log
+  fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/components/produccion/TarjetaMaquina.tsx:37',message:'TarjetaMaquina render',data:{maquinaId:maquina.id, nombre:maquina.nombre},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H5'})}).catch(()=>{});
+  // #endregion
   const esMaquinaEnEdicion = useAtomValue(esMaquinaEnEdicionAtom);
   const toggleModoEdicion = useSetAtom(toggleModoEdicionAtom);
   const actualizarContadorPiezas = useSetAtom(actualizarContadorPiezasAtom);
@@ -408,4 +411,4 @@ export function TarjetaMaquina({
       />
     </div>
   );
-}
+});

@@ -176,11 +176,17 @@ export function LoginModalMaquina({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 py-8 backdrop-blur"
-      onMouseDown={(event) => {
+      onClick={(event) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/components/produccion/LoginModalMaquina.tsx:179',message:'Backdrop onClick',data:{target:event.target === event.currentTarget},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
         if (event.target === event.currentTarget) onCerrar?.();
       }}
     >
-      <div className="relative w-full max-w-2xl rounded-[32px] border border-slate-200 bg-card shadow-2xl">
+      <div 
+        className="relative w-full max-w-2xl rounded-[32px] border border-slate-200 bg-card shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="absolute right-16 top-4 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-slate-600 shadow-sm">
           <ActivitySquare className="h-4 w-4 text-emerald-500" />
           <span className="text-sm font-medium">Paso {ordenSeleccionada ? '2' : '1'} de 2</span>
@@ -189,10 +195,15 @@ export function LoginModalMaquina({
           <button
             type="button"
             aria-label="Cerrar"
-            onClick={onCerrar}
-            className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+            onClick={() => {
+              // #region agent log
+              fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/components/produccion/LoginModalMaquina.tsx:192',message:'Close button clicked',timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
+              // #endregion
+              onCerrar();
+            }}
+            className="absolute right-4 top-4 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md transition-all active:scale-95 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         )}
         <div className="space-y-8 p-8 max-h-[80vh] overflow-y-auto">
@@ -393,7 +404,7 @@ export function LoginModalMaquina({
                 </div>
               </section>
 
-              <section>
+              <section className="touch-manipulation">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
                     Paso 2

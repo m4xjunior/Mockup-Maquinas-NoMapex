@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { ListaMaquinas } from '@/components/produccion/ListaMaquinas';
 import { ModalNovaOrdenFabricacion } from '@/components/produccion/ModalNovaOrdenFabricacion';
 import { ModalNovaMaquina } from '@/components/produccion/ModalNovaMaquina';
@@ -115,23 +116,41 @@ const sidebarItems: SidebarItem[] = [
   },
 ];
 
-export default function Home() {
-  const ultimaActualizacion = useAtomValue(ultimaActualizacionAtom);
+function RelojSidebar() {
   const [montado, setMontado] = useState(false);
   const [horaAtual, setHoraAtual] = useState(new Date());
 
   useEffect(() => {
     setMontado(true);
-  }, []);
-
-  // Atualizar hora atual a cada segundo
-  useEffect(() => {
     const intervalo = setInterval(() => {
       setHoraAtual(new Date());
-    }, 1000); // Atualiza a cada segundo
-
+    }, 1000);
     return () => clearInterval(intervalo);
   }, []);
+
+  if (!montado) return <p className="text-4xl font-black text-rose-600 tabular-nums">--:--</p>;
+
+  return (
+    <p className="text-4xl font-black text-rose-600 tabular-nums">
+      {horaAtual.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })}
+    </p>
+  );
+}
+
+export default function Home() {
+  // #region agent log
+  fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/app/page.tsx:143',message:'Home render',timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'PERF'})}).catch(()=>{});
+  // #endregion
+  const ultimaActualizacion = useAtomValue(ultimaActualizacionAtom);
+  const [montado, setMontado] = useState(false);
+
+  useEffect(() => {
+    setMontado(true);
+  }, []);
+
   const agregarMaquina = useSetAtom(agregarMaquinaAtom);
   const asignarOrdenAMaquina = useSetAtom(asignarOrdenAMaquinaAtom);
   const actualizarOperario = useSetAtom(actualizarOperarioAtom);
@@ -267,7 +286,15 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+              <Link 
+                href="/" 
+                className="flex items-center gap-4 transition-opacity hover:opacity-80"
+                onClick={() => {
+                  // #region agent log
+                  fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/app/page.tsx:285',message:'Logo clicked',timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'LOGO'})}).catch(()=>{});
+                  // #endregion
+                }}
+              >
                 <img
                   src="/LOGOKH.JPG"
                   alt="Logo"
@@ -281,7 +308,7 @@ export default function Home() {
                     Seguimiento de estado de máquinas en tiempo real
                   </p>
                 </div>
-              </div>
+              </Link>
             </div>
 
             <div className="flex items-center justify-between gap-3 sm:justify-end">
@@ -388,12 +415,7 @@ export default function Home() {
                         <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
                           Hora actual
                         </p>
-                        <p className="text-4xl font-black text-rose-600 tabular-nums">
-                          {montado ? horaAtual.toLocaleTimeString('es-ES', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          }) : '--:--'}
-                        </p>
+                        <RelojSidebar />
                       </div>
                     </div>
                   )}
