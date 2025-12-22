@@ -177,9 +177,6 @@ export function LoginModalMaquina({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 sm:px-4 sm:py-8 backdrop-blur"
       onClick={(event) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/components/produccion/LoginModalMaquina.tsx:179',message:'Backdrop onClick',data:{target:event.target === event.currentTarget},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
-        // #endregion
         if (event.target === event.currentTarget) onCerrar?.();
       }}
     >
@@ -187,25 +184,25 @@ export function LoginModalMaquina({
         className="relative w-full max-w-2xl sm:rounded-[32px] border-slate-200 bg-card shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none border-0 sm:border"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="absolute right-16 top-4 z-20 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-slate-600 shadow-sm scale-90 sm:scale-100">
-          <ActivitySquare className="h-4 w-4 text-emerald-500" />
-          <span className="text-sm font-medium">Paso {ordenSeleccionada ? '2' : '1'} de 2</span>
-        </div>
         {onCerrar && (
           <button
             type="button"
             aria-label="Cerrar"
-            onClick={() => {
-              // #region agent log
-              fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/components/produccion/LoginModalMaquina.tsx:192',message:'Close button clicked',timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
-              // #endregion
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               onCerrar();
             }}
-            className="absolute right-4 top-4 z-20 inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md transition-all active:scale-95 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+            className="absolute right-4 top-4 z-[100] inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-xl transition-all active:scale-90 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
           >
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </button>
         )}
+        <div className="absolute right-16 top-4 z-20 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-slate-600 shadow-sm scale-90 sm:scale-100">
+          <ActivitySquare className="h-4 w-4 text-emerald-500" />
+          <span className="text-sm font-medium">Paso {ordenSeleccionada ? '2' : '1'} de 2</span>
+        </div>
+        
         <div className="flex-1 space-y-6 p-6 sm:p-8 overflow-y-auto">
           <header className="flex flex-col justify-between gap-4 md:flex-row md:items-start pt-8 sm:pt-0">
             <div>
@@ -229,7 +226,7 @@ export function LoginModalMaquina({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
               <div className="flex items-start gap-2 text-xs text-blue-800">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">1</span>
-                <p>Selecciona tu <strong>proceso</strong> y el <strong>equipo</strong> de trabajo.</p>
+                <p>Selecciona tu <strong>proceso</strong> y el <strong>equipo</strong> de trabalho.</p>
               </div>
               <div className="flex items-start gap-2 text-xs text-blue-800">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">2</span>
@@ -278,7 +275,7 @@ export function LoginModalMaquina({
                         className={cn(
                           'rounded-3xl border border-slate-200 bg-white px-5 py-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200',
                           estaSeleccionado &&
-                            'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-[0_12px_35px_rgba(16,185,129,0.25)]'
+                            'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-[0_12px_35_rgba(16,185,129,0.25)]'
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -351,7 +348,7 @@ export function LoginModalMaquina({
                             ? 'hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg'
                             : 'opacity-50 grayscale-[0.8] bg-slate-50 cursor-not-allowed',
                           estaSeleccionada &&
-                            'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-[0_12px_35px_rgba(16,185,129,0.25)]'
+                            'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-[0_12px_35_rgba(16,185,129,0.25)]'
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -410,14 +407,14 @@ export function LoginModalMaquina({
                     Paso 2
                   </p>
                   <h3 className="text-xl font-semibold text-slate-900">
-                    Selecciona el trabajo (OF)
+                    Selecciona el trabalho (OF)
                   </h3>
                   <p className="text-sm text-slate-500">
                     Elija la Orden de Fabricación que tiene asignada para este equipo.
                   </p>
                 </div>
 
-                  {maquinaSeleccionada ? (
+                {maquinaSeleccionada ? (
                   ordenesDisponibles.length > 0 ? (
                     <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
                       {ordenesDisponibles.map((orden) => {
@@ -479,31 +476,31 @@ export function LoginModalMaquina({
               </section>
             </div>
           )}
-
-          <footer className="sticky bottom-0 mt-auto flex flex-col gap-4 border-t border-slate-200 bg-white p-6 text-slate-600 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3 text-xs sm:text-sm">
-              <PlayCircle className="h-5 w-5 shrink-0" />
-              <span>
-                Al confirmar, se registrará su actividad y comenzará el conteo de piezas.
-              </span>
-            </div>
-            <Button
-              disabled={accionDeshabilitada || isSubmitting}
-              size="lg"
-              className="w-full sm:w-auto rounded-full bg-emerald-500 px-8 py-6 sm:py-2 text-base font-semibold text-white hover:bg-emerald-400"
-              onClick={handleIniciarMonitoreo}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Iniciando...
-                </>
-              ) : (
-                'Iniciar monitoreo'
-              )}
-            </Button>
-          </footer>
         </div>
+
+        <footer className="sticky bottom-0 mt-auto flex flex-col gap-4 border-t border-slate-200 bg-white p-6 text-slate-600 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3 text-xs sm:text-sm">
+            <PlayCircle className="h-5 w-5 shrink-0" />
+            <span>
+              Al confirmar, se registrará su actividad y comenzará el conteo de piezas.
+            </span>
+          </div>
+          <Button
+            disabled={accionDeshabilitada || isSubmitting}
+            size="lg"
+            className="w-full sm:w-auto rounded-full bg-emerald-500 px-8 py-6 sm:py-2 text-base font-semibold text-white hover:bg-emerald-400"
+            onClick={handleIniciarMonitoreo}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Iniciando...
+              </>
+            ) : (
+              'Iniciar monitoreo'
+            )}
+          </Button>
+        </footer>
       </div>
 
       {/* Modal de PIN Operario */}

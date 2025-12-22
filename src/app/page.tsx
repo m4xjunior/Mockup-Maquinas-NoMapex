@@ -523,6 +523,9 @@ export default function Home() {
         onSeleccionarOrden={setOrdenSeleccionada}
         onConfirmar={handleConfirmarSesion}
         onCerrar={() => {
+          // #region agent log
+          fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/app/page.tsx:525',message:'onCerrar called in Home',data:{sesionActiva:!!sesionActiva},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
+          // #endregion
           if (sesionActiva) {
             setSelectorManualAbierto(false);
             return;
