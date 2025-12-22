@@ -175,7 +175,7 @@ export function LoginModalMaquina({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 py-8 backdrop-blur"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 sm:px-4 sm:py-8 backdrop-blur"
       onClick={(event) => {
         // #region agent log
         fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/components/produccion/LoginModalMaquina.tsx:179',message:'Backdrop onClick',data:{target:event.target === event.currentTarget},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
@@ -184,10 +184,10 @@ export function LoginModalMaquina({
       }}
     >
       <div 
-        className="relative w-full max-w-2xl rounded-[32px] border border-slate-200 bg-card shadow-2xl"
+        className="relative w-full max-w-2xl sm:rounded-[32px] border-slate-200 bg-card shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none border-0 sm:border"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="absolute right-16 top-4 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-slate-600 shadow-sm">
+        <div className="absolute right-16 top-4 z-20 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-slate-600 shadow-sm scale-90 sm:scale-100">
           <ActivitySquare className="h-4 w-4 text-emerald-500" />
           <span className="text-sm font-medium">Paso {ordenSeleccionada ? '2' : '1'} de 2</span>
         </div>
@@ -201,13 +201,13 @@ export function LoginModalMaquina({
               // #endregion
               onCerrar();
             }}
-            className="absolute right-4 top-4 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md transition-all active:scale-95 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+            className="absolute right-4 top-4 z-20 inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md transition-all active:scale-95 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
           >
             <X className="h-5 w-5" />
           </button>
         )}
-        <div className="space-y-8 p-8 max-h-[80vh] overflow-y-auto">
-          <header className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+        <div className="flex-1 space-y-6 p-6 sm:p-8 overflow-y-auto">
+          <header className="flex flex-col justify-between gap-4 md:flex-row md:items-start pt-8 sm:pt-0">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
                 Inicio operativo
@@ -480,9 +480,9 @@ export function LoginModalMaquina({
             </div>
           )}
 
-          <footer className="flex flex-col gap-2 border-t border-slate-200 pt-6 text-slate-600 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3 text-sm">
-              <PlayCircle className="h-5 w-5" />
+          <footer className="sticky bottom-0 mt-auto flex flex-col gap-4 border-t border-slate-200 bg-white p-6 text-slate-600 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3 text-xs sm:text-sm">
+              <PlayCircle className="h-5 w-5 shrink-0" />
               <span>
                 Al confirmar, se registrará su actividad y comenzará el conteo de piezas.
               </span>
@@ -490,7 +490,7 @@ export function LoginModalMaquina({
             <Button
               disabled={accionDeshabilitada || isSubmitting}
               size="lg"
-              className="rounded-full bg-emerald-500 px-8 text-base font-semibold text-white hover:bg-emerald-400"
+              className="w-full sm:w-auto rounded-full bg-emerald-500 px-8 py-6 sm:py-2 text-base font-semibold text-white hover:bg-emerald-400"
               onClick={handleIniciarMonitoreo}
             >
               {isSubmitting ? (
