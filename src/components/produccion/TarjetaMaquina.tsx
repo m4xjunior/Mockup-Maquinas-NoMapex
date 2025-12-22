@@ -40,9 +40,6 @@ export const TarjetaMaquina = memo(function TarjetaMaquina({
   onToggleExpansion,
   className,
 }: TarjetaMaquinaProps) {
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/components/produccion/TarjetaMaquina.tsx:37',message:'TarjetaMaquina render',data:{maquinaId:maquina.id, nombre:maquina.nombre},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H5'})}).catch(()=>{});
-  // #endregion
   const esMaquinaEnEdicion = useAtomValue(esMaquinaEnEdicionAtom);
   const toggleModoEdicion = useSetAtom(toggleModoEdicionAtom);
   const actualizarContadorPiezas = useSetAtom(actualizarContadorPiezasAtom);
@@ -264,7 +261,7 @@ export const TarjetaMaquina = memo(function TarjetaMaquina({
               <div className="flex items-center gap-2 text-[11px] text-slate-600">
                 <FileText className="h-3 w-3 text-blue-500" />
                 <span className="font-medium">Trabajo:</span>
-                <span className="truncate">{maquina.ordenFabricacion?.numero || 'Sin trabajo activo'}</span>
+                <span className="truncate">{maquina.ordenFabricacion?.numero || 'Sin trabalho activo'}</span>
               </div>
 
               <div className="flex items-center gap-2 text-[11px] text-slate-600">

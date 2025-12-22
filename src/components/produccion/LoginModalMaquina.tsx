@@ -81,7 +81,7 @@ export function LoginModalMaquina({
     }
   }, [mostrarPin]);
 
-  // Selección directa sin PIN
+  // Selección directa sem PIN
   const handleSeleccionarProceso = (id: string | null) => {
     setTipoProcesoSeleccionado(id);
     if (id) {
@@ -134,7 +134,7 @@ export function LoginModalMaquina({
     let operarioEncontrado = operarios.find(op => op.codigo === pin);
 
     if (!operarioEncontrado) {
-      // Por ahora, permitimos cualquier código creando un operario temporal
+      // Por agora, permitimos qualquer código criando um operário temporal
       operarioEncontrado = {
         id: `temp-${pin}`,
         nombre: `Operario [${pin}]`,
@@ -147,7 +147,7 @@ export function LoginModalMaquina({
     setMostrarPin(false);
     setIsSubmitting(true);
 
-    // Pequeño delay para mostrar el toast antes de confirmar
+    // Pequeno delay para mostrar o toast antes de confirmar
     setTimeout(() => {
       onConfirmar();
       setIsSubmitting(false);
@@ -429,7 +429,7 @@ export function LoginModalMaquina({
                             className={cn(
                               'rounded-3xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200',
                               estaSeleccionada &&
-                                'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-[0_12px_35px_rgba(129,140,248,0.25)]'
+                                'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-[0_12px_35_rgba(129,140,248,0.25)]'
                             )}
                           >
                             <div className="flex items-center justify-between">

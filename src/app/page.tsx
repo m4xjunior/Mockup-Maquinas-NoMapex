@@ -118,17 +118,18 @@ const sidebarItems: SidebarItem[] = [
 
 function RelojSidebar() {
   const [montado, setMontado] = useState(false);
-  const [horaAtual, setHoraAtual] = useState(new Date());
+  const [horaAtual, setHoraAtual] = useState<Date | null>(null);
 
   useEffect(() => {
     setMontado(true);
+    setHoraAtual(new Date());
     const intervalo = setInterval(() => {
       setHoraAtual(new Date());
     }, 1000);
     return () => clearInterval(intervalo);
   }, []);
 
-  if (!montado) return <p className="text-4xl font-black text-rose-600 tabular-nums">--:--</p>;
+  if (!montado || !horaAtual) return <p className="text-4xl font-black text-rose-600 tabular-nums">--:--</p>;
 
   return (
     <p className="text-4xl font-black text-rose-600 tabular-nums">
@@ -141,9 +142,6 @@ function RelojSidebar() {
 }
 
 export default function Home() {
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/app/page.tsx:143',message:'Home render',timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'PERF'})}).catch(()=>{});
-  // #endregion
   const ultimaActualizacion = useAtomValue(ultimaActualizacionAtom);
   const [montado, setMontado] = useState(false);
 
@@ -289,11 +287,6 @@ export default function Home() {
               <Link 
                 href="/" 
                 className="flex items-center gap-4 transition-opacity hover:opacity-80"
-                onClick={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/app/page.tsx:285',message:'Logo clicked',timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'LOGO'})}).catch(()=>{});
-                  // #endregion
-                }}
               >
                 <img
                   src="/LOGOKH.JPG"
@@ -433,7 +426,7 @@ export default function Home() {
               <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
-                    Puesto de trabajo activo
+                    Puesto de trabalho activo
                   </p>
                   {sesionActiva && maquinaSesion && ordenSesion ? (
                     <>
@@ -523,9 +516,6 @@ export default function Home() {
         onSeleccionarOrden={setOrdenSeleccionada}
         onConfirmar={handleConfirmarSesion}
         onCerrar={() => {
-          // #region agent log
-          fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'src/app/page.tsx:525',message:'onCerrar called in Home',data:{sesionActiva:!!sesionActiva},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
-          // #endregion
           if (sesionActiva) {
             setSelectorManualAbierto(false);
             return;
