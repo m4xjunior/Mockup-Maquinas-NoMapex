@@ -262,7 +262,7 @@ export function LoginModalMaquina({
                     Selecciona el proceso
                   </h3>
                 </div>
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
                   {TIPOS_PROCESO.map((tipo) => {
                     const Icon = tipo.icon;
                     const estaSeleccionado = tipoProcesoSeleccionado === tipo.id;
@@ -332,7 +332,7 @@ export function LoginModalMaquina({
                   </span>
                 </div>
 
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
                   {maquinas.map((maquina) => {
                     const estaSeleccionada = maquinaSeleccionada === maquina.id;
                     const tieneOFs = (ordenesPorMaquina[maquina.id]?.length || 0) > 0;
@@ -417,9 +417,9 @@ export function LoginModalMaquina({
                   </p>
                 </div>
 
-                {maquinaSeleccionada ? (
+                  {maquinaSeleccionada ? (
                   ordenesDisponibles.length > 0 ? (
-                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
                       {ordenesDisponibles.map((orden) => {
                         const estaSeleccionada = ordenSeleccionada === orden.id;
                         return (
@@ -448,10 +448,10 @@ export function LoginModalMaquina({
                                 <CheckCircle2 className="h-5 w-5 text-indigo-400" />
                               )}
                             </div>
-                            <p className="mt-3 max-h-[48px] overflow-hidden text-ellipsis text-xs text-slate-500">
+                            <p className="mt-3 overflow-hidden text-ellipsis text-[10px] sm:text-xs text-slate-500 line-clamp-2">
                               {orden.nombrePieza}
                             </p>
-                            <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                            <div className="mt-3 flex items-center justify-between text-[10px] sm:text-xs text-slate-500">
                               <span>
                                 Meta: {orden.cantidadObjetivo.toLocaleString('es-ES')} piezas
                               </span>
