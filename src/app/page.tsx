@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { ListaMaquinas } from '@/components/produccion/ListaMaquinas';
 import { ModalNovaOrdenFabricacion } from '@/components/produccion/ModalNovaOrdenFabricacion';
 import { ModalNovaMaquina } from '@/components/produccion/ModalNovaMaquina';
@@ -25,9 +24,7 @@ import {
 import { Plus, FileText, GaugeCircle, Send, ShieldCheck, Layers, QrCode } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { LoginModalMaquina } from '@/components/produccion/LoginModalMaquina';
-import { ModalMapex } from '@/components/produccion/ModalMapex';
 import { cn } from '@/lib/utils';
-import { LayoutGrid } from 'lucide-react';
 
 const accentStyles = {
   emerald: {
@@ -101,7 +98,7 @@ const sidebarItems: SidebarItem[] = [
   {
     id: 'll',
     label: 'L.L',
-    descripcion: '',
+    descripcion: 'Desarrollo',
     meta: 'Rutas pull activas',
     accent: 'amber',
     icon: Layers,
@@ -109,37 +106,12 @@ const sidebarItems: SidebarItem[] = [
   {
     id: 'etiqueta',
     label: 'Etiqueta',
-    descripcion: 'Impresión y rastreo',
+    descripcion: 'Imprimir Etiquetas',
     meta: 'Layout KH listo',
     accent: 'rose',
     icon: QrCode,
   },
 ];
-
-function RelojSidebar() {
-  const [montado, setMontado] = useState(false);
-  const [horaAtual, setHoraAtual] = useState<Date | null>(null);
-
-  useEffect(() => {
-    setMontado(true);
-    setHoraAtual(new Date());
-    const intervalo = setInterval(() => {
-      setHoraAtual(new Date());
-    }, 1000);
-    return () => clearInterval(intervalo);
-  }, []);
-
-  if (!montado || !horaAtual) return <p className="text-4xl font-black text-rose-600 tabular-nums">--:--</p>;
-
-  return (
-    <p className="text-4xl font-black text-rose-600 tabular-nums">
-      {horaAtual.toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit',
-      })}
-    </p>
-  );
-}
 
 export default function Home() {
   const ultimaActualizacion = useAtomValue(ultimaActualizacionAtom);
@@ -148,7 +120,6 @@ export default function Home() {
   useEffect(() => {
     setMontado(true);
   }, []);
-
   const agregarMaquina = useSetAtom(agregarMaquinaAtom);
   const asignarOrdenAMaquina = useSetAtom(asignarOrdenAMaquinaAtom);
   const actualizarOperario = useSetAtom(actualizarOperarioAtom);
@@ -160,7 +131,6 @@ export default function Home() {
   // Estado para controlar los modales
   const [modalOrdenAbierto, setModalOrdenAbierto] = useState(false);
   const [modalMaquinaAbierto, setModalMaquinaAbierto] = useState(false);
-  const [modalMapexAbierto, setModalMapexAbierto] = useState(false);
   const [sesionActiva, setSesionActiva] = useState<{
     maquinaId: string;
     ordenId: string;
@@ -284,10 +254,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center justify-between">
-              <Link 
-                href="/" 
-                className="flex items-center gap-4 transition-opacity hover:opacity-80"
-              >
+              <div className="flex items-center gap-4">
                 <img
                   src="/LOGOKH.JPG"
                   alt="Logo"
@@ -301,7 +268,7 @@ export default function Home() {
                     Seguimiento de estado de máquinas en tiempo real
                   </p>
                 </div>
-              </Link>
+              </div>
             </div>
 
             <div className="flex items-center justify-between gap-3 sm:justify-end">
@@ -331,7 +298,7 @@ export default function Home() {
                   size="sm"
                 >
                   <span className="hidden sm:inline">
-                    {sesionActiva ? 'Cambiar puesto/trabajo' : 'Seleccionar puesto'}
+                    {sesionActiva ? 'Cambiar máquina/OF' : 'Seleccionar máquina'}
                   </span>
                   <span className="sm:hidden">Elegir</span>
                 </Button>
@@ -370,8 +337,6 @@ export default function Home() {
             {sidebarItems.map((item) => {
               const accent = accentStyles[item.accent];
               const Icon = item.icon;
-              const isEtiqueta = item.id === 'etiqueta';
-
               return (
                 <div
                   key={item.id}
@@ -394,24 +359,11 @@ export default function Home() {
                       <p className="text-xs font-bold uppercase tracking-wider text-gray-500 truncate">
                         {item.label}
                       </p>
-                      {item.descripcion && (
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {item.descripcion}
-                        </p>
-                      )}
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {item.descripcion}
+                      </p>
                     </div>
                   </div>
-
-                  {isEtiqueta && (
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <div className="flex flex-col justify-start items-start">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
-                          Hora actual
-                        </p>
-                        <RelojSidebar />
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -426,7 +378,7 @@ export default function Home() {
               <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
-                    Puesto de trabalho activo
+                    Sesión actual
                   </p>
                   {sesionActiva && maquinaSesion && ordenSesion ? (
                     <>
@@ -438,24 +390,19 @@ export default function Home() {
                       </p>
                     </>
                   ) : (
-                    <div className="mt-1 flex flex-col gap-1">
-                      <p className="text-base text-gray-600 font-medium">
-                        Listo para comenzar el turno.
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        Pulsa el botón para seleccionar equipo y trabajo e iniciar el registro de producción.
-                      </p>
-                    </div>
+                    <p className="mt-1 text-base text-gray-600">
+                      Define la máquina y la OF para habilitar el monitoreo.
+                    </p>
                   )}
                 </div>
                 <div className="flex items-center gap-3">
                   {sesionActiva && (
                     <span className="rounded-full bg-gray-100 px-4 py-1 text-sm font-medium text-gray-700">
-                      Equipo {sesionActiva.maquinaId} · Trabajo {sesionActiva.ordenId}
+                      Máquina {sesionActiva.maquinaId} · OF {sesionActiva.ordenId}
                     </span>
                   )}
                   <Button variant="outline" onClick={handleAbrirSelector} size="sm">
-                    {sesionActiva ? 'Cambiar sesión' : 'Seleccionar trabajo'}
+                    {sesionActiva ? 'Cambiar sesión' : 'Seleccionar sesión'}
                   </Button>
                 </div>
               </div>
@@ -466,32 +413,12 @@ export default function Home() {
           <div className="px-4 py-8 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
               <ListaMaquinas maquinaSesionActivaId={sesionActiva?.maquinaId || null} />
-              
-              {/* Botón para abrir Mapex Dashboard */}
-              <div className="mt-12 flex flex-col items-center justify-center border-t border-slate-200 pt-12">
-                <div className="mb-6 text-center">
-                  <h3 className="text-xl font-bold text-slate-900">Sincronización Mapex</h3>
-                  <p className="text-slate-500">Accede al panel completo de las 21 máquinas del sistema SCADA</p>
-                </div>
-                <Button 
-                  size="lg" 
-                  onClick={() => setModalMapexAbierto(true)}
-                  className="rounded-full bg-slate-900 px-8 py-6 text-lg hover:bg-slate-800 shadow-xl transition-all hover:scale-105"
-                >
-                  <LayoutGrid className="mr-3 h-6 w-6" />
-                  Abrir Dashboard Mapex
-                </Button>
-              </div>
             </div>
           </div>
         </main>
       </div>
 
       {/* Modales */}
-      <ModalMapex 
-        abierto={modalMapexAbierto} 
-        onCerrar={() => setModalMapexAbierto(false)} 
-      />
       <ModalNovaOrdenFabricacion
         abierto={modalOrdenAbierto}
         operariosDisponibles={operarios}

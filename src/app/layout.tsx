@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import React from "react";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "Monitor de Producción - NoMapex",
@@ -25,6 +27,8 @@ export default function RootLayout({
       <body>
         {children}
         <Toaster />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
