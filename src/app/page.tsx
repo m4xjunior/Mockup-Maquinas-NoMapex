@@ -20,7 +20,6 @@ import {
 import {
   operarios as operariosMock,
 } from '@/lib/datos-mock';
-import { obterMaquinasAPI } from '@/lib/api-maquinas';
 import { Plus, FileText } from 'lucide-react';
 import { LoginModalMaquina } from '@/components/produccion/LoginModalMaquina';
 import { ModalMapex } from '@/components/produccion/ModalMapex';
