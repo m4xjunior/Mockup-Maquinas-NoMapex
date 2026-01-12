@@ -351,12 +351,12 @@ export function LoginModalMaquina({
                               {estaActiva && (
                                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                               )}
-                              <p className="text-sm font-semibold text-slate-900">
-                                {maquina.nombre}
+                              <p className="text-sm font-bold text-slate-900">
+                                {maquina.tipo}
                               </p>
                             </div>
-                            <p className="text-xs uppercase tracking-wide text-slate-500 ml-4">
-                              {maquina.tipo}
+                            <p className="text-xs text-slate-500 ml-4">
+                              {maquina.nombre}
                             </p>
                           </div>
                           {estaSeleccionada ? (

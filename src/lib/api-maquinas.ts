@@ -142,7 +142,7 @@ function mapearMaquinaAPI(maquinaAPI: MaquinaAPI): Maquina {
 export async function obterMaquinasAPI(): Promise<Maquina[]> {
   try {
     const response = await fetch('https://n8n.lexusfx.com/webhook/maquinas', {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
