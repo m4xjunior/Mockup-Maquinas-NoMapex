@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Maquina, OrdenFabricacion, Operario } from '@/types/produccion';
+import { Maquina, Operario } from '@/types/produccion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -26,11 +26,8 @@ import {
 interface LoginModalMaquinaProps {
   visible: boolean;
   maquinas: Maquina[];
-  ordenesPorMaquina: Record<string, OrdenFabricacion[]>;
   maquinaSeleccionada: string | null;
-  ordenSeleccionada: string | null;
   onSeleccionarMaquina: (idMaquina: string | null) => void;
-  onSeleccionarOrden: (idOrden: string | null) => void;
   onConfirmar: () => void;
   onCerrar?: () => void;
   accionDeshabilitada: boolean;
@@ -45,21 +42,12 @@ const TIPOS_PROCESO = [
   { id: 'rwk', label: 'RWK', icon: RotateCcw },
 ];
 
-const STATS_MOCK: Record<string, { activas: number; ofs: number; op: string }> = {
-  fabricacion: { activas: 5, ofs: 3, op: 'Juan García [001]' },
-  secuencia: { activas: 2, ofs: 1, op: 'María López [002]' },
-  carretilleros: { activas: 4, ofs: 0, op: 'Carlos Rodríguez [003]' },
-  rwk: { activas: 1, ofs: 1, op: 'Ana Martínez [004]' },
-};
 
 export function LoginModalMaquina({
   visible,
   maquinas,
-  ordenesPorMaquina,
   maquinaSeleccionada,
-  ordenSeleccionada,
   onSeleccionarMaquina,
-  onSeleccionarOrden,
   onConfirmar,
   onCerrar,
   accionDeshabilitada,
@@ -82,6 +70,20 @@ export function LoginModalMaquina({
   }, [mostrarPin]);
 
   // Selección directa sem PIN
+  // Calcular estatísticas das máquinas
+  const calcularEstatisticas = () => {
+    const activas = maquinas.filter(m => m.estado === 'activa').length;
+    const conOF = maquinas.filter(m => m.ordenFabricacion !== null).length;
+
+    return {
+      activas,
+      ofs: conOF,
+      total: maquinas.length,
+    };
+  };
+
+  const stats = calcularEstatisticas();
+
   const handleSeleccionarProceso = (id: string | null) => {
     setTipoProcesoSeleccionado(id);
     if (id) {
@@ -102,16 +104,6 @@ export function LoginModalMaquina({
     }
   };
 
-  const handleSeleccionarOrden = (id: string | null) => {
-    onSeleccionarOrden(id);
-    if (id) {
-      const ordenes = maquinaSeleccionada ? ordenesPorMaquina[maquinaSeleccionada] ?? [] : [];
-      const orden = ordenes.find(o => o.id === id);
-      if (orden) {
-        toast.success(`OF ${orden.numero} seleccionada`);
-      }
-    }
-  };
 
   // Iniciar monitoreo - mostrar modal de PIN
   const handleIniciarMonitoreo = () => {
@@ -147,11 +139,21 @@ export function LoginModalMaquina({
     setMostrarPin(false);
     setIsSubmitting(true);
 
-    // Pequeno delay para mostrar o toast antes de confirmar
+    // Pequeno delay para mostrar o toast antes de redirecionar
     setTimeout(() => {
       onConfirmar();
+
+      // Redirecionar para a URL com a máquina selecionada
+      if (maquinaSeleccionada) {
+        const maquina = maquinas.find(m => m.id === maquinaSeleccionada);
+        if (maquina) {
+          const url = `http://10.0.0.66/mrpii/indexkhv2.html?posicion=${encodeURIComponent(maquina.nombre)}`;
+          window.location.href = url;
+        }
+      }
+
       setIsSubmitting(false);
-      toast.success('Monitoreo iniciado correctamente');
+      toast.success('Redireccionando al sistema...');
     }, 500);
   };
 
@@ -169,9 +171,15 @@ export function LoginModalMaquina({
 
   if (!visible) return null;
 
-  const ordenesDisponibles: OrdenFabricacion[] = maquinaSeleccionada
-    ? ordenesPorMaquina[maquinaSeleccionada] ?? []
-    : [];
+  // Ordenar máquinas: Produção primeiro, depois fechadas
+  const maquinasOrdenadas = [...maquinas].sort((a, b) => {
+    // Máquinas ativas (produção) primeiro
+    if (a.estado === 'activa' && b.estado !== 'activa') return -1;
+    if (a.estado !== 'activa' && b.estado === 'activa') return 1;
+
+    // Depois por nome
+    return a.nombre.localeCompare(b.nombre);
+  });
 
   return (
     <div
@@ -200,7 +208,7 @@ export function LoginModalMaquina({
         )}
         <div className="absolute right-16 top-4 z-20 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-slate-600 shadow-sm scale-90 sm:scale-100">
           <ActivitySquare className="h-4 w-4 text-emerald-500" />
-          <span className="text-sm font-medium">Paso {ordenSeleccionada ? '2' : '1'} de 2</span>
+          <span className="text-sm font-medium">Configuración</span>
         </div>
         
         <div className="flex-1 space-y-6 p-6 sm:p-8 overflow-y-auto">
@@ -230,14 +238,10 @@ export function LoginModalMaquina({
               </div>
               <div className="flex items-start gap-2 text-xs text-blue-800">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">2</span>
-                <p>Elige la <strong>Orden de Fabricación (OF)</strong> liberada.</p>
-              </div>
-              <div className="flex items-start gap-2 text-xs text-blue-800">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">3</span>
                 <p>Haz clic en <strong>"Iniciar monitoreo"</strong> al final de la página.</p>
               </div>
               <div className="flex items-start gap-2 text-xs text-blue-800">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">4</span>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">3</span>
                 <p>Identifícate introduciendo tu <strong>código de operario</strong>.</p>
               </div>
             </div>
@@ -263,7 +267,6 @@ export function LoginModalMaquina({
                   {TIPOS_PROCESO.map((tipo) => {
                     const Icon = tipo.icon;
                     const estaSeleccionado = tipoProcesoSeleccionado === tipo.id;
-                    const stats = STATS_MOCK[tipo.id];
 
                     return (
                       <motion.button
@@ -298,19 +301,13 @@ export function LoginModalMaquina({
                           <div className="flex items-center gap-2 text-[11px] text-slate-600">
                             <ActivitySquare className="h-3 w-3 text-emerald-500" />
                             <span className="font-medium">Activas:</span>
-                            <span>{stats.activas} máquinas</span>
+                            <span className="font-bold text-emerald-600">{stats.activas} máquinas</span>
                           </div>
 
                           <div className="flex items-center gap-2 text-[11px] text-slate-600">
                             <FileText className="h-3 w-3 text-blue-500" />
-                            <span className="font-medium">OFs pendientes:</span>
-                            <span>{stats.ofs}</span>
-                          </div>
-
-                          <div className="flex items-center gap-2 text-[11px] text-slate-600">
-                            <User className="h-3 w-3 text-indigo-500" />
-                            <span className="font-medium">Supervisor:</span>
-                            <span className="truncate">{stats.op}</span>
+                            <span className="font-medium">Con OF:</span>
+                            <span>{stats.ofs} de {stats.total}</span>
                           </div>
                         </div>
                       </motion.button>
@@ -330,38 +327,35 @@ export function LoginModalMaquina({
                 </div>
 
                 <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
-                  {maquinas.map((maquina) => {
+                  {maquinasOrdenadas.map((maquina) => {
                     const estaSeleccionada = maquinaSeleccionada === maquina.id;
-                    const tieneOFs = (ordenesPorMaquina[maquina.id]?.length || 0) > 0;
+                    const estaActiva = maquina.estado === 'activa';
 
                     return (
                       <motion.button
                         key={maquina.id}
                         type="button"
-                        disabled={!tieneOFs}
                         onClick={() => handleSeleccionarMaquina(estaSeleccionada ? null : maquina.id)}
-                        whileHover={tieneOFs ? { scale: 1.02 } : {}}
-                        whileTap={tieneOFs ? { scale: 0.98 } : {}}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         className={cn(
-                          'rounded-3xl border border-slate-200 bg-white px-5 py-4 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200',
-                          tieneOFs
-                            ? 'hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg'
-                            : 'opacity-50 grayscale-[0.8] bg-slate-50 cursor-not-allowed',
+                          'rounded-3xl border border-slate-200 bg-white px-5 py-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200',
+                          estaActiva && 'border-l-4 border-l-emerald-500',
                           estaSeleccionada &&
                             'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-[0_12px_35_rgba(16,185,129,0.25)]'
                         )}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-semibold text-slate-900">
-                              {maquina.nombre}
-                              {!tieneOFs && (
-                                <span className="ml-2 text-[9px] font-bold uppercase text-red-500 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">
-                                  Sin OF
-                                </span>
+                            <div className="flex items-center gap-2">
+                              {estaActiva && (
+                                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                               )}
-                            </p>
-                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                              <p className="text-sm font-semibold text-slate-900">
+                                {maquina.nombre}
+                              </p>
+                            </div>
+                            <p className="text-xs uppercase tracking-wide text-slate-500 ml-4">
                               {maquina.tipo}
                             </p>
                           </div>
@@ -399,80 +393,6 @@ export function LoginModalMaquina({
                     );
                   })}
                 </div>
-              </section>
-
-              <section className="touch-manipulation">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
-                    Paso 2
-                  </p>
-                  <h3 className="text-xl font-semibold text-slate-900">
-                    Selecciona el trabalho (OF)
-                  </h3>
-                  <p className="text-sm text-slate-500">
-                    Elija la Orden de Fabricación que tiene asignada para este equipo.
-                  </p>
-                </div>
-
-                {maquinaSeleccionada ? (
-                  ordenesDisponibles.length > 0 ? (
-                    <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
-                      {ordenesDisponibles.map((orden) => {
-                        const estaSeleccionada = ordenSeleccionada === orden.id;
-                        return (
-                          <motion.button
-                            key={orden.id}
-                            type="button"
-                            onClick={() => handleSeleccionarOrden(estaSeleccionada ? null : orden.id)}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className={cn(
-                              'rounded-3xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200',
-                              estaSeleccionada &&
-                                'border-indigo-500 bg-indigo-50 text-indigo-900 shadow-[0_12px_35_rgba(129,140,248,0.25)]'
-                            )}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
-                                  {orden.numeroPieza}
-                                </p>
-                                <p className="text-sm font-semibold text-slate-900">
-                                  {orden.numero}
-                                </p>
-                              </div>
-                              {estaSeleccionada && (
-                                <CheckCircle2 className="h-5 w-5 text-indigo-400" />
-                              )}
-                            </div>
-                            <p className="mt-3 overflow-hidden text-ellipsis text-[10px] sm:text-xs text-slate-500 line-clamp-2">
-                              {orden.nombrePieza}
-                            </p>
-                            <div className="mt-3 flex items-center justify-between text-[10px] sm:text-xs text-slate-500">
-                              <span>
-                                Meta: {orden.cantidadObjetivo.toLocaleString('es-ES')} piezas
-                              </span>
-                              {orden.fechaLimite && (
-                                <span>
-                                  Límite:{' '}
-                                  {montado ? orden.fechaLimite.toLocaleDateString('es-ES') : '--/--/----'}
-                                </span>
-                              )}
-                            </div>
-                          </motion.button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-                      No se encontraron OF disponibles para la máquina seleccionada.
-                    </p>
-                  )
-                ) : (
-                  <p className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-                    Elige primero una máquina para visualizar sus OF.
-                  </p>
-                )}
               </section>
             </div>
           )}

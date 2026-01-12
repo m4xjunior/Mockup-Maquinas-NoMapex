@@ -9,7 +9,7 @@ import {
   toggleExpansionAtom,
   esMaquinaExpandidaAtom,
 } from '@/lib/atoms/produccion';
-import { obtenerMaquinas } from '@/lib/datos-mock';
+import { obterMaquinasAPI } from '@/lib/api-maquinas';
 import { TarjetaMaquina } from './TarjetaMaquina';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -32,7 +32,7 @@ export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquina
       setCargando(true);
       setError(null);
       try {
-        const datos = await obtenerMaquinas();
+        const datos = await obterMaquinasAPI();
         setMaquinas(datos);
       } catch (err) {
         setError(

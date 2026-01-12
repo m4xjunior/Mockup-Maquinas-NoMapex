@@ -18,103 +18,13 @@ import {
   operariosAtom,
 } from '@/lib/atoms/produccion';
 import {
-  ordenesDisponiblesPorMaquina,
-  ordenesFabricacion,
   operarios as operariosMock,
 } from '@/lib/datos-mock';
-import { Plus, FileText, GaugeCircle, Send, ShieldCheck, Layers, QrCode } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { obterMaquinasAPI } from '@/lib/api-maquinas';
+import { Plus, FileText } from 'lucide-react';
 import { LoginModalMaquina } from '@/components/produccion/LoginModalMaquina';
 import { ModalMapex } from '@/components/produccion/ModalMapex';
-import { cn } from '@/lib/utils';
 import { LayoutGrid } from 'lucide-react';
-
-const accentStyles = {
-  emerald: {
-    text: 'text-gray-700',
-    pill: 'bg-gray-100 text-gray-700',
-    border: 'border-gray-200',
-    glow: '',
-  },
-  sky: {
-    text: 'text-gray-700',
-    pill: 'bg-gray-100 text-gray-700',
-    border: 'border-gray-200',
-    glow: '',
-  },
-  violet: {
-    text: 'text-gray-700',
-    pill: 'bg-gray-100 text-gray-700',
-    border: 'border-gray-200',
-    glow: '',
-  },
-  amber: {
-    text: 'text-gray-700',
-    pill: 'bg-gray-100 text-gray-700',
-    border: 'border-gray-200',
-    glow: '',
-  },
-  rose: {
-    text: 'text-gray-700',
-    pill: 'bg-gray-100 text-gray-700',
-    border: 'border-gray-200',
-    glow: '',
-  },
-} as const;
-
-type Accent = keyof typeof accentStyles;
-
-interface SidebarItem {
-  id: string;
-  label: string;
-  descripcion: string;
-  meta: string;
-  accent: Accent;
-  icon: LucideIcon;
-}
-
-const sidebarItems: SidebarItem[] = [
-  {
-    id: 'pi',
-    label: 'P.I',
-    descripcion: 'Pauta Inspección',
-    meta: 'Setups y arranques liberados',
-    accent: 'emerald',
-    icon: GaugeCircle,
-  },
-  {
-    id: 'pe',
-    label: 'P.E',
-    descripcion: 'Pauta Embalaje',
-    meta: 'Expedición sincronizada',
-    accent: 'sky',
-    icon: Send,
-  },
-  {
-    id: 'qa',
-    label: 'Q.A',
-    descripcion: 'Calidad',
-    meta: 'Checklist 100% aplicado',
-    accent: 'violet',
-    icon: ShieldCheck,
-  },
-  {
-    id: 'll',
-    label: 'L.L',
-    descripcion: '',
-    meta: 'Rutas pull activas',
-    accent: 'amber',
-    icon: Layers,
-  },
-  {
-    id: 'etiqueta',
-    label: 'Etiqueta',
-    descripcion: 'Impresión y rastreo',
-    meta: 'Layout KH listo',
-    accent: 'rose',
-    icon: QrCode,
-  },
-];
 
 function RelojSidebar() {
   const [montado, setMontado] = useState(false);
@@ -163,14 +73,10 @@ export default function Home() {
   const [modalMapexAbierto, setModalMapexAbierto] = useState(false);
   const [sesionActiva, setSesionActiva] = useState<{
     maquinaId: string;
-    ordenId: string;
   } | null>(null);
   const [selectorManualAbierto, setSelectorManualAbierto] = useState(false);
   const [selectorInicialCerrado, setSelectorInicialCerrado] = useState(false);
   const [maquinaSeleccionada, setMaquinaSeleccionada] = useState<string | null>(
-    null
-  );
-  const [ordenSeleccionada, setOrdenSeleccionada] = useState<string | null>(
     null
   );
 
@@ -184,7 +90,6 @@ export default function Home() {
   useEffect(() => {
     if (!sesionActiva) {
       setMaquinaSeleccionada(null);
-      setOrdenSeleccionada(null);
     }
   }, [sesionActiva]);
 
@@ -230,27 +135,19 @@ export default function Home() {
 
   const modalSeleccionVisible =
     selectorManualAbierto || (!sesionActiva && !selectorInicialCerrado);
-  const accionLoginDeshabilitada =
-    !maquinaSeleccionada || !ordenSeleccionada;
+  const accionLoginDeshabilitada = !maquinaSeleccionada;
 
   const maquinaSesion =
     sesionActiva && maquinas.length > 0
       ? maquinas.find((maquina) => maquina.id === sesionActiva.maquinaId) ?? null
       : null;
 
-  const ordenSesion = sesionActiva
-    ? (
-        ordenesDisponiblesPorMaquina[sesionActiva.maquinaId] ?? ordenesFabricacion
-      ).find((orden) => orden.id === sesionActiva.ordenId) ?? null
-    : null;
-
   const handleConfirmarSesion = () => {
-    if (!maquinaSeleccionada || !ordenSeleccionada) {
+    if (!maquinaSeleccionada) {
       return;
     }
     setSesionActiva({
       maquinaId: maquinaSeleccionada,
-      ordenId: ordenSeleccionada,
     });
     setSelectorManualAbierto(false);
 
@@ -272,7 +169,6 @@ export default function Home() {
   const handleAbrirSelector = () => {
     if (sesionActiva) {
       setMaquinaSeleccionada(sesionActiva.maquinaId);
-      setOrdenSeleccionada(sesionActiva.ordenId);
     }
     setSelectorManualAbierto(true);
   };
@@ -362,59 +258,12 @@ export default function Home() {
         {/* Sidebar fixo na lateral esquerda */}
         <aside className="hidden lg:block lg:w-64 xl:w-72 shrink-0 p-4 border-r border-gray-200 bg-gray-50">
           <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-wider text-gray-900">
-              Puestos
-            </p>
-          </div>
-          <div className="mt-4 space-y-3">
-            {sidebarItems.map((item) => {
-              const accent = accentStyles[item.accent];
-              const Icon = item.icon;
-              const isEtiqueta = item.id === 'etiqueta';
-
-              return (
-                <div
-                  key={item.id}
-                  className={cn(
-                    'rounded-2xl border bg-white p-3 shadow-sm hover:shadow-md transition-shadow',
-                    accent.border
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border',
-                        accent.text,
-                        accent.border
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500 truncate">
-                        {item.label}
-                      </p>
-                      {item.descripcion && (
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {item.descripcion}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {isEtiqueta && (
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <div className="flex flex-col justify-start items-start">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
-                          Hora actual
-                        </p>
-                        <RelojSidebar />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            <div className="flex flex-col justify-start items-start">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                Hora actual
+              </p>
+              <RelojSidebar />
+            </div>
           </div>
         </aside>
 
@@ -428,13 +277,13 @@ export default function Home() {
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
                     Puesto de trabalho activo
                   </p>
-                  {sesionActiva && maquinaSesion && ordenSesion ? (
+                  {sesionActiva && maquinaSesion ? (
                     <>
                       <p className="mt-1 text-lg font-semibold text-gray-900">
-                        {maquinaSesion.nombre} · {ordenSesion.numero}
+                        {maquinaSesion.nombre}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {ordenSesion.nombrePieza}
+                        {maquinaSesion.tipo}
                       </p>
                     </>
                   ) : (
@@ -451,7 +300,7 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   {sesionActiva && (
                     <span className="rounded-full bg-gray-100 px-4 py-1 text-sm font-medium text-gray-700">
-                      Equipo {sesionActiva.maquinaId} · Trabajo {sesionActiva.ordenId}
+                      Equipo {sesionActiva.maquinaId}
                     </span>
                   )}
                   <Button variant="outline" onClick={handleAbrirSelector} size="sm">
@@ -509,11 +358,8 @@ export default function Home() {
       <LoginModalMaquina
         visible={modalSeleccionVisible}
         maquinas={maquinas}
-        ordenesPorMaquina={ordenesDisponiblesPorMaquina}
         maquinaSeleccionada={maquinaSeleccionada}
-        ordenSeleccionada={ordenSeleccionada}
         onSeleccionarMaquina={setMaquinaSeleccionada}
-        onSeleccionarOrden={setOrdenSeleccionada}
         onConfirmar={handleConfirmarSesion}
         onCerrar={() => {
           if (sesionActiva) {
