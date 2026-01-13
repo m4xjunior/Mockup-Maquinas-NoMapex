@@ -1,17 +1,18 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   maquinasAtom,
   cargandoAtom,
   errorAtom,
+  toggleExpansionAtom,
+  esMaquinaExpandidaAtom,
 } from '@/lib/atoms/produccion';
 import { obterMaquinasAPI } from '@/lib/api-maquinas';
 import { TarjetaMaquina } from './TarjetaMaquina';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AnimatePresence } from 'motion/react';
 
 interface ListaMaquinasProps {
   className?: string;
@@ -26,6 +27,8 @@ export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquina
   const [maquinas, setMaquinas] = useAtom(maquinasAtom);
   const [cargando, setCargando] = useAtom(cargandoAtom);
   const [error, setError] = useAtom(errorAtom);
+  const toggleExpansion = useSetAtom(toggleExpansionAtom);
+  const esMaquinaExpandida = useAtomValue(esMaquinaExpandidaAtom);
 
   // Cargar dados ao montar e atualizar periodicamente
   useEffect(() => {
@@ -111,20 +114,15 @@ export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquina
 
   // Lista de máquinas - Layout VERTICAL (uma por linha)
   return (
-    <div className={cn(
-      // Layout em coluna - cada card ocupa largura total
-      'flex flex-col gap-4',
-      className
-    )}>
-      <AnimatePresence mode="popLayout">
-        {maquinasFiltradas.map((maquina) => (
-          <TarjetaMaquina
-            key={maquina.id}
-            maquina={maquina}
-            maquinaSesionActivaId={maquinaSesionActivaId}
-          />
-        ))}
-      </AnimatePresence>
+    <div className={cn('flex flex-wrap gap-3', className)}>
+      {maquinasFiltradas.map((maquina) => (
+        <TarjetaMaquina
+          key={maquina.id}
+          maquina={maquina}
+          estaExpandida={esMaquinaExpandida(maquina.id)}
+          onToggleExpansion={() => toggleExpansion(maquina.id)}
+        />
+      ))}
     </div>
   );
 }
