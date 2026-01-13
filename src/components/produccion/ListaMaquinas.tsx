@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import {
   maquinasAtom,
   cargandoAtom,
   errorAtom,
-  toggleExpansionAtom,
-  esMaquinaExpandidaAtom,
 } from '@/lib/atoms/produccion';
 import { obterMaquinasAPI } from '@/lib/api-maquinas';
 import { TarjetaMaquina } from './TarjetaMaquina';
@@ -20,14 +18,16 @@ interface ListaMaquinasProps {
   maquinaSesionActivaId?: string | null;
 }
 
+/**
+ * Lista de máquinas em layout vertical (uma por linha)
+ * Cada card ocupa largura total para máxima visibilidade
+ */
 export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquinasProps) {
   const [maquinas, setMaquinas] = useAtom(maquinasAtom);
   const [cargando, setCargando] = useAtom(cargandoAtom);
   const [error, setError] = useAtom(errorAtom);
-  const toggleExpansion = useSetAtom(toggleExpansionAtom);
-  const esMaquinaExpandida = useAtomValue(esMaquinaExpandidaAtom);
 
-  // Cargar datos al montar el componente y actualizar periódicamente
+  // Cargar dados ao montar e atualizar periodicamente
   useEffect(() => {
     const cargarDatos = async (esInicial = false) => {
       if (esInicial) {
@@ -50,10 +50,9 @@ export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquina
       }
     };
 
-    // Cargar datos inicialmente
     cargarDatos(true);
 
-    // Configurar polling a cada 30 segundos
+    // Polling a cada 30 segundos
     const intervalo = setInterval(() => {
       cargarDatos(false);
     }, 30000);
@@ -66,57 +65,55 @@ export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquina
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            Cargando máquinas...
+          <Loader2 className="h-12 w-12 animate-spin text-emerald-500" />
+          <p className="text-lg font-medium text-gray-600">
+            Carregando máquinas...
           </p>
         </div>
       </div>
     );
   }
 
-  // Estado de error
+  // Estado de erro
   if (error) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="flex max-w-md flex-col items-center gap-3 text-center">
-          <AlertCircle className="h-12 w-12 text-destructive" />
-          <h3 className="text-lg font-semibold">Error al cargar datos</h3>
-          <p className="text-sm text-muted-foreground">{error}</p>
+        <div className="flex max-w-md flex-col items-center gap-4 text-center p-8 bg-red-50 rounded-2xl">
+          <AlertCircle className="h-16 w-16 text-red-500" />
+          <h3 className="text-xl font-bold text-red-700">Erro ao carregar dados</h3>
+          <p className="text-base text-red-600">{error}</p>
         </div>
       </div>
     );
   }
 
-  // Estado vacío
+  // Estado vazio
   if (maquinas.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="flex max-w-md flex-col items-center gap-3 text-center">
-          <div className="rounded-full bg-muted p-4">
-            <AlertCircle className="h-8 w-8 text-muted-foreground" />
+        <div className="flex max-w-md flex-col items-center gap-4 text-center p-8 bg-gray-50 rounded-2xl">
+          <div className="rounded-full bg-gray-200 p-6">
+            <AlertCircle className="h-12 w-12 text-gray-500" />
           </div>
-          <h3 className="text-lg font-semibold">No hay máquinas disponibles</h3>
-          <p className="text-sm text-muted-foreground">
-            No se encontraron máquinas en el sistema de monitoreo.
+          <h3 className="text-xl font-bold text-gray-700">Nenhuma máquina disponível</h3>
+          <p className="text-base text-gray-600">
+            Não foram encontradas máquinas no sistema de monitoramento.
           </p>
         </div>
       </div>
     );
   }
 
-  // Filtrar máquinas según la sesión activa
+  // Filtrar máquinas segundo a sessão ativa
   const maquinasFiltradas = maquinaSesionActivaId
     ? maquinas.filter((maquina) => maquina.id === maquinaSesionActivaId)
     : maquinas;
 
-  // Lista de máquinas - Grid otimizado para monitores industriais
-  // Cards maiores, menos por linha, maior espaçamento
+  // Lista de máquinas - Layout VERTICAL (uma por linha)
   return (
     <div className={cn(
-      'grid gap-6 auto-rows-auto',
-      // Layout responsivo: menos cards por linha para melhor visibilidade
-      'grid-cols-1 md:grid-cols-2 xl:grid-cols-3',
+      // Layout em coluna - cada card ocupa largura total
+      'flex flex-col gap-4',
       className
     )}>
       <AnimatePresence mode="popLayout">
@@ -124,8 +121,6 @@ export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquina
           <TarjetaMaquina
             key={maquina.id}
             maquina={maquina}
-            estaExpandida={esMaquinaExpandida(maquina.id)}
-            onToggleExpansion={() => toggleExpansion(maquina.id)}
             maquinaSesionActivaId={maquinaSesionActivaId}
           />
         ))}

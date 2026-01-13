@@ -14,7 +14,6 @@ import {
   actualizarOperarioAtom,
   maquinasAtom,
   cargandoAtom,
-  toggleExpansionAtom,
   operariosAtom,
 } from '@/lib/atoms/produccion';
 import {
@@ -64,7 +63,6 @@ export default function Home() {
   const maquinas = useAtomValue(maquinasAtom);
   const [operarios, setOperarios] = useAtom(operariosAtom);
   const cargandoMaquinas = useAtomValue(cargandoAtom);
-  const toggleExpansion = useSetAtom(toggleExpansionAtom);
 
   // Estado para controlar los modales
   const [modalOrdenAbierto, setModalOrdenAbierto] = useState(false);
@@ -150,10 +148,7 @@ export default function Home() {
     });
     setSelectorManualAbierto(false);
 
-    // Expandir automáticamente la máquina seleccionada
-    toggleExpansion(maquinaSeleccionada);
-
-    // Hacer scroll hacia la máquina después de un pequeño delay para permitir la expansión
+    // Fazer scroll para a máquina selecionada
     setTimeout(() => {
       const elementoMaquina = document.getElementById(`maquina-${maquinaSeleccionada}`);
       if (elementoMaquina) {
@@ -162,7 +157,7 @@ export default function Home() {
           block: 'start',
         });
       }
-    }, 300);
+    }, 100);
   };
 
   const handleAbrirSelector = () => {
