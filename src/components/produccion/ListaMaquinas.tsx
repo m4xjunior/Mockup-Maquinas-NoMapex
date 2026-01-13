@@ -13,6 +13,7 @@ import { obterMaquinasAPI } from '@/lib/api-maquinas';
 import { TarjetaMaquina } from './TarjetaMaquina';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AnimatePresence } from 'motion/react';
 
 interface ListaMaquinasProps {
   className?: string;
@@ -109,17 +110,26 @@ export function ListaMaquinas({ className, maquinaSesionActivaId }: ListaMaquina
     ? maquinas.filter((maquina) => maquina.id === maquinaSesionActivaId)
     : maquinas;
 
-  // Lista de máquinas
+  // Lista de máquinas - Grid otimizado para monitores industriais
+  // Cards maiores, menos por linha, maior espaçamento
   return (
-    <div className={cn('flex flex-wrap gap-3', className)}>
-      {maquinasFiltradas.map((maquina) => (
-        <TarjetaMaquina
-          key={maquina.id}
-          maquina={maquina}
-          estaExpandida={esMaquinaExpandida(maquina.id)}
-          onToggleExpansion={() => toggleExpansion(maquina.id)}
-        />
-      ))}
+    <div className={cn(
+      'grid gap-6 auto-rows-auto',
+      // Layout responsivo: menos cards por linha para melhor visibilidade
+      'grid-cols-1 md:grid-cols-2 xl:grid-cols-3',
+      className
+    )}>
+      <AnimatePresence mode="popLayout">
+        {maquinasFiltradas.map((maquina) => (
+          <TarjetaMaquina
+            key={maquina.id}
+            maquina={maquina}
+            estaExpandida={esMaquinaExpandida(maquina.id)}
+            onToggleExpansion={() => toggleExpansion(maquina.id)}
+            maquinaSesionActivaId={maquinaSesionActivaId}
+          />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

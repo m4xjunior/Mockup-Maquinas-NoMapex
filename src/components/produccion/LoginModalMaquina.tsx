@@ -182,30 +182,30 @@ export function LoginModalMaquina({
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 sm:px-4 sm:py-8 backdrop-blur"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onCerrar?.();
-      }}
-    >
-      <div 
-        className="relative w-full max-w-2xl sm:rounded-[32px] border-slate-200 bg-card shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none border-0 sm:border"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {onCerrar && (
-          <button
-            type="button"
-            aria-label="Cerrar"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onCerrar();
-            }}
-            className="absolute right-4 top-4 z-[100] inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-xl transition-all active:scale-90 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        )}
+    <>
+      {/* Backdrop separado - garante que cliques no fundo fecham o modal */}
+      <div
+        className="fixed inset-0 z-50 bg-background/80 backdrop-blur"
+        onClick={() => onCerrar?.()}
+        aria-hidden="true"
+      />
+      
+      {/* Container do modal - posicionado acima do backdrop */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center sm:px-4 sm:py-8 pointer-events-none">
+        <div 
+          className="relative w-full max-w-2xl sm:rounded-[32px] border-slate-200 bg-card shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none border-0 sm:border pointer-events-auto"
+        >
+          {/* Botão X com área de toque expandida para uso industrial */}
+          {onCerrar && (
+            <button
+              type="button"
+              aria-label="Cerrar modal"
+              onClick={() => onCerrar()}
+              className="absolute right-3 top-3 z-[100] inline-flex h-14 w-14 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-slate-600 shadow-xl transition-all duration-150 active:scale-95 active:bg-slate-100 hover:bg-slate-50 hover:border-slate-300 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 touch-manipulation"
+            >
+              <X className="h-7 w-7" strokeWidth={2.5} />
+            </button>
+          )}
         <div className="absolute right-16 top-4 z-20 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-slate-600 shadow-sm scale-90 sm:scale-100">
           <ActivitySquare className="h-4 w-4 text-emerald-500" />
           <span className="text-sm font-medium">Configuración</span>
@@ -421,11 +421,21 @@ export function LoginModalMaquina({
             )}
           </Button>
         </footer>
+        </div>
       </div>
 
-      {/* Modal de PIN Operario */}
+      {/* Modal de PIN Operario - fora do container principal */}
       {mostrarPin && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setMostrarPin(false);
+              setPin('');
+              setErrorPin(false);
+            }
+          }}
+        >
           <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl">
             <div className="mb-6 flex flex-col items-center text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
@@ -468,14 +478,14 @@ export function LoginModalMaquina({
                     setPin('');
                     setErrorPin(false);
                   }}
-                  className="h-12 rounded-2xl border-slate-200 text-slate-600"
+                  className="h-14 rounded-2xl border-slate-200 text-slate-600 text-base font-semibold touch-manipulation"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={!pin}
-                  className="h-12 rounded-2xl bg-emerald-600 font-bold text-white hover:bg-emerald-500"
+                  className="h-14 rounded-2xl bg-emerald-600 font-bold text-white hover:bg-emerald-500 text-base touch-manipulation"
                 >
                   Confirmar
                 </Button>
@@ -484,6 +494,6 @@ export function LoginModalMaquina({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

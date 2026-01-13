@@ -47,6 +47,22 @@ export function ModalMapex({ abierto, onCerrar }: ModalMapexProps) {
     }
   }, [abierto]);
 
+  // Soporte para tecla ESC - mejorado con capture para mayor prioridad
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && abierto) {
+        event.preventDefault();
+        event.stopPropagation();
+        onCerrar();
+      }
+    };
+
+    if (abierto) {
+      document.addEventListener('keydown', handleKeyDown, { capture: true });
+      return () => document.removeEventListener('keydown', handleKeyDown, { capture: true });
+    }
+  }, [abierto, onCerrar]);
+
   const toggleExpansion = (id: string) => {
     setExpandidas(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -59,8 +75,16 @@ export function ModalMapex({ abierto, onCerrar }: ModalMapexProps) {
   );
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-2 sm:p-4">
-      <div className="relative flex h-[95vh] w-full max-w-full sm:max-w-7xl overflow-hidden rounded-2xl sm:rounded-[40px] border border-slate-200 bg-[#f8fafc] shadow-2xl">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-2 sm:p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onCerrar();
+      }}
+    >
+      <div
+        className="relative flex h-[95vh] w-full max-w-full sm:max-w-7xl overflow-hidden rounded-2xl sm:rounded-[40px] border border-slate-200 bg-[#f8fafc] shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Sidebar Mapex */}
         <aside className="flex w-20 flex-col items-center border-r border-slate-200 bg-white py-8 md:w-24">
@@ -115,8 +139,17 @@ export function ModalMapex({ abierto, onCerrar }: ModalMapexProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onCerrar}
-                className="h-10 w-10 rounded-full hover:bg-slate-100"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onCerrar();
+                }}
+                onMouseDown={(e) => {
+                  // Backup handler para mouseDown
+                  e.stopPropagation();
+                }}
+                className="h-10 w-10 rounded-full hover:bg-slate-100 relative z-50"
+                aria-label="Cerrar modal"
               >
                 <X className="h-6 w-6" />
               </Button>

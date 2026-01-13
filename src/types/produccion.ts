@@ -96,3 +96,41 @@ export interface RegistroParo {
   observaciones?: string;
   operario?: Operario; // Operario que registró el paro
 }
+
+/**
+ * Tipos de eventos no sistema
+ */
+export type TipoEvento =
+  | 'inicio-paro'
+  | 'fim-paro'
+  | 'troca-of'
+  | 'troca-operario'
+  | 'manutencao-programada'
+  | 'alerta-qualidade';
+
+/**
+ * Evento no timeline de uma máquina
+ */
+export interface EventoMaquina {
+  id: string;
+  maquinaId: string;
+  tipo: TipoEvento;
+  timestamp: Date;
+  descricao: string;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Alerta sobre condição de uma máquina
+ */
+export interface Alerta {
+  id: string;
+  tipo: string;
+  severidade: 'low' | 'medium' | 'high' | 'critical';
+  mensagem: string;
+  timestamp: Date;
+  acao?: {
+    label: string;
+    handler: () => void;
+  };
+}

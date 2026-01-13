@@ -1,16 +1,30 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Maquina, Operario } from '@/types/produccion';
+import { Maquina, Operario, CategoriaParo, MotivoParo } from '@/types/produccion';
 import { BadgeEstado } from './BadgeEstado';
 import { InfoOperario } from './InfoOperario';
 import { InfoOrdenFabricacion } from './InfoOrdenFabricacion';
-import { ContadorPiezas } from './ContadorPiezas';
 import { FormularioEdicionPiezas } from './FormularioEdicionPiezas';
 import { ModalOperario } from './ModalOperario';
 import { ModalRegistroParo } from './ModalRegistroParo';
 import { ModalNovoOperario } from './ModalNovoOperario';
-import { ChevronDown, Pencil, UserPlus, AlertOctagon, Play, Plus, User, FileText, Activity } from 'lucide-react';
+import { MetricasCard } from './MetricasCard';
+import { TimelineEventos } from './TimelineEventos';
+import { AlertasBadge } from './AlertasBadge';
+import { IconButton } from './IconButton';
+import { SpotlightCard } from '@/components/ui/spotlight-card';
+import {
+  Pencil,
+  UserPlus,
+  AlertOctagon,
+  Play,
+  Plus,
+  MoreVertical,
+  ChevronDown,
+  User,
+  FileText,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -25,20 +39,27 @@ import {
   parosActivosMaquinaAtom,
   agregarOperarioAtom,
 } from '@/lib/atoms/produccion';
-import { CategoriaParo, MotivoParo } from '@/types/produccion';
 
 interface TarjetaMaquinaProps {
   maquina: Maquina;
   estaExpandida: boolean;
   onToggleExpansion: () => void;
   className?: string;
+  maquinaSesionActivaId?: string | null;
 }
 
 // Colores de borde según el estado
 const coloresBorde = {
-  activa: 'border-l-emerald-500',
-  detenida: 'border-l-red-500',
-  mantenimiento: 'border-l-amber-500',
+  activa: 'bg-emerald-500',
+  detenida: 'bg-red-500',
+  mantenimiento: 'bg-amber-500',
+};
+
+// Gradientes de fondo según estado
+const gradientesFondo = {
+  activa: 'from-emerald-50/50 to-white/80',
+  detenida: 'from-red-50/50 to-white/80',
+  mantenimiento: 'from-amber-50/50 to-white/80',
 };
 
 export function TarjetaMaquina({
@@ -46,6 +67,7 @@ export function TarjetaMaquina({
   estaExpandida,
   onToggleExpansion,
   className,
+  maquinaSesionActivaId,
 }: TarjetaMaquinaProps) {
   const esMaquinaEnEdicion = useAtomValue(esMaquinaEnEdicionAtom);
   const toggleModoEdicion = useSetAtom(toggleModoEdicionAtom);
@@ -70,6 +92,7 @@ export function TarjetaMaquina({
 
   const enModoEdicion = esMaquinaEnEdicion(maquina.id);
   const tieneContadorPiezas = maquina.contadorPiezas !== null;
+  const esSesionActiva = maquinaSesionActivaId === maquina.id;
 
   const handleGuardarEdicion = (piezasProducidas: number) => {
     actualizarContadorPiezas({
@@ -84,12 +107,12 @@ export function TarjetaMaquina({
   };
 
   const handleClickEditar = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evitar que se cierre el acordeón
+    e.stopPropagation();
     toggleModoEdicion(maquina.id);
   };
 
   const handleAbrirModalOperario = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evitar que se cierre el acordeón
+    e.stopPropagation();
     setModalOperarioAbierto(true);
   };
 
@@ -149,7 +172,7 @@ export function TarjetaMaquina({
   const handleFinalizarParo = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (parosActivos.length > 0) {
-      const paroActivo = parosActivos[0]; // Finalizar el primer paro activo
+      const paroActivo = parosActivos[0];
       finalizarParo({
         idRegistroParo: paroActivo.id,
         idMaquina: maquina.id,
@@ -157,70 +180,146 @@ export function TarjetaMaquina({
     }
   };
 
+  // Cor do spotlight baseada no estado
+  const spotlightColors = {
+    activa: 'rgba(16, 185, 129, 0.1)',
+    detenida: 'rgba(239, 68, 68, 0.1)',
+    mantenimiento: 'rgba(245, 158, 11, 0.1)',
+  };
+
   return (
-    <div
+    <motion.div
       id={`maquina-${maquina.id}`}
-      className={cn(
-        'overflow-hidden rounded-lg border border-l-4 bg-white shadow-sm transition-shadow hover:shadow-md',
-        coloresBorde[maquina.estado],
-        className
-      )}
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      {/* Header - Siempre visible */}
-      <button
-        onClick={onToggleExpansion}
-        className="w-full px-4 py-3 text-left transition-colors hover:bg-gray-50"
-        aria-expanded={estaExpandida}
-        aria-controls={`detalles-${maquina.id}`}
+      <SpotlightCard
+        spotlightColor={spotlightColors[maquina.estado]}
+        intensity={0.2}
+        className={cn(
+          'relative group',
+          // Gradiente sutil baseado no estado
+          `bg-gradient-to-br ${gradientesFondo[maquina.estado]}`,
+          // Destaque se é máquina da sessão ativa
+          esSesionActiva && [
+            'ring-2 ring-blue-500 ring-offset-2',
+            'shadow-2xl shadow-blue-500/20',
+          ],
+          className
+        )}
       >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <BadgeEstado estado={maquina.estado} size="sm" />
-            <div className="min-w-0">
-              <h3 className="truncate text-lg font-semibold">
+        {/* Barra lateral colorida - mais larga para visibilidade industrial */}
+        <div
+          className={cn(
+            'absolute left-0 top-0 h-full w-2 rounded-l-2xl',
+            coloresBorde[maquina.estado]
+          )}
+        />
+
+        {/* Badge de alertas (esquina superior derecha) */}
+        <div className="absolute top-3 right-3 z-10">
+          <AlertasBadge maquina={maquina} />
+        </div>
+
+        {/* Header - Siempre visible - Layout industrial */}
+        <button
+          onClick={onToggleExpansion}
+          className="w-full px-5 py-4 text-left transition-colors hover:bg-white/30 touch-manipulation"
+          aria-expanded={estaExpandida}
+          aria-controls={`detalles-${maquina.id}`}
+        >
+          <div className="flex items-start justify-between gap-4">
+            {/* Info básica - tipografia maior para industrial */}
+            <div className="flex-1 min-w-0">
+              {/* Estado prominente no topo */}
+              <div className="flex items-center gap-3 mb-2">
+                <BadgeEstado 
+                  estado={maquina.estado} 
+                  size="lg" 
+                  mostrarPulso={maquina.estado === 'activa'}
+                />
+              </div>
+
+              {/* Nome da máquina - grande e bold */}
+              <h3 className="text-xl font-bold text-gray-900 truncate mb-0.5">
                 {maquina.nombre}
               </h3>
-              <p className="text-sm text-muted-foreground">{maquina.tipo}</p>
+
+              <p className="text-base text-gray-600">{maquina.tipo}</p>
+
+              {/* Operario y OF - mais visíveis */}
+              <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-gray-600">
+                {maquina.operario ? (
+                  <span className="flex items-center gap-1.5 bg-gray-100 px-2 py-1 rounded-lg">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">{maquina.operario.nombre}</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">Sin operario</span>
+                  </span>
+                )}
+
+                {maquina.ordenFabricacion && (
+                  <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-1 rounded-lg">
+                    <FileText className="h-4 w-4" />
+                    <span className="font-medium">{maquina.ordenFabricacion.numero}</span>
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            {/* Botones de paro */}
-            {maquina.estado === 'activa' && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 gap-1.5 border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100 hover:text-red-800"
-                onClick={handleAbrirModalParo}
-              >
-                <AlertOctagon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline text-xs font-medium">Paro</span>
-              </Button>
-            )}
+            {/* Quick Actions - botões maiores para touch */}
+            <div className="hidden md:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              {maquina.estado === 'activa' && (
+                <IconButton
+                  icon={<AlertOctagon className="h-4 w-4" />}
+                  onClick={handleAbrirModalParo}
+                  tooltip="Registrar paro"
+                  variant="danger"
+                  size="md"
+                />
+              )}
 
-            {maquina.estado === 'detenida' && tieneParoActivo && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 gap-1.5 border-emerald-200 bg-emerald-50 px-3 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
-                onClick={handleFinalizarParo}
-              >
-                <Play className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline text-xs font-medium">Reanudar</span>
-              </Button>
-            )}
+              {maquina.estado === 'detenida' && tieneParoActivo && (
+                <IconButton
+                  icon={<Play className="h-4 w-4" />}
+                  onClick={handleFinalizarParo}
+                  tooltip="Reanudar"
+                  variant="success"
+                  size="md"
+                />
+              )}
 
+              <IconButton
+                icon={<Pencil className="h-4 w-4" />}
+                onClick={handleClickEditar}
+                tooltip="Editar"
+                size="md"
+              />
+
+              <IconButton
+                icon={<MoreVertical className="h-4 w-4" />}
+                onClick={(e) => e.stopPropagation()}
+                tooltip="Mais opções"
+                size="md"
+              />
+            </div>
+
+            {/* Ícono de expansión - maior */}
             <ChevronDown
               className={cn(
-                'h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200',
+                'h-6 w-6 shrink-0 text-gray-500 transition-transform duration-200',
                 estaExpandida && 'rotate-180'
               )}
             />
           </div>
-        </div>
-      </button>
+        </button>
 
-      {/* Detalles - Expansible */}
+      {/* Contenido expansible */}
       <AnimatePresence initial={false}>
         {estaExpandida && (
           <motion.div
@@ -229,9 +328,32 @@ export function TarjetaMaquina({
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
           >
-            <div className="space-y-4 border-t px-4 py-4">
-              {/* Información del operario */}
+            <div className="px-4 pb-4 space-y-4 border-t border-white/50">
+              {/* Métricas de Producción */}
+              {maquina.contadorPiezas && maquina.ordenFabricacion && !enModoEdicion && (
+                <div className="pt-4">
+                  <MetricasCard maquina={maquina} />
+                </div>
+              )}
+
+              {/* Formulario de Edición de Piezas */}
+              {enModoEdicion && tieneContadorPiezas && (
+                <div className="pt-4">
+                  <FormularioEdicionPiezas
+                    idMaquina={maquina.id}
+                    contadorActual={maquina.contadorPiezas!}
+                    onGuardar={handleGuardarEdicion}
+                    onCancelar={handleCancelarEdicion}
+                  />
+                </div>
+              )}
+
+              {/* Timeline de Eventos */}
+              <TimelineEventos maquina={maquina} limit={3} />
+
+              {/* Información del Operario */}
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -270,63 +392,30 @@ export function TarjetaMaquina({
                 <InfoOperario operario={maquina.operario} />
               </div>
 
-              {/* Orden de fabricación */}
+              {/* Orden de Fabricación */}
               <div>
-                <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Orden de Fabricación
                 </h4>
-                <InfoOrdenFabricacion
-                  ordenFabricacion={maquina.ordenFabricacion}
-                />
+                <InfoOrdenFabricacion ordenFabricacion={maquina.ordenFabricacion} />
               </div>
 
-              {/* Contador de piezas */}
-              {maquina.contadorPiezas && (
-                <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Progreso
-                    </h4>
-                    {tieneContadorPiezas && !enModoEdicion && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 gap-1 px-2 text-xs"
-                        onClick={handleClickEditar}
-                      >
-                        <Pencil className="h-3 w-3" />
-                        Editar
-                      </Button>
-                    )}
-                  </div>
-
-                  {enModoEdicion ? (
-                    <FormularioEdicionPiezas
-                      idMaquina={maquina.id}
-                      contadorActual={maquina.contadorPiezas}
-                      onGuardar={handleGuardarEdicion}
-                      onCancelar={handleCancelarEdicion}
-                    />
-                  ) : (
-                    <ContadorPiezas contador={maquina.contadorPiezas} />
-                  )}
-                </div>
-              )}
-
               {/* Última actualización */}
-              <div className="pt-2 text-xs text-muted-foreground">
+              <div className="pt-2 text-xs text-gray-500">
                 Última actualización:{' '}
-                {montado ? maquina.ultimaActualizacion.toLocaleTimeString('es-ES', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }) : '--:--'}
+                {montado
+                  ? maquina.ultimaActualizacion.toLocaleTimeString('es-ES', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : '--:--'}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Modal para agregar/editar operario */}
+      {/* Modales */}
       <ModalOperario
         abierto={modalOperarioAbierto}
         operarioActual={maquina.operario}
@@ -334,20 +423,19 @@ export function TarjetaMaquina({
         onGuardar={handleGuardarOperario}
       />
 
-      {/* Modal para crear nuevo operario */}
       <ModalNovoOperario
         abierto={modalNovoOperarioAbierto}
         onCerrar={handleCerrarModalNovoOperario}
         onGuardar={handleGuardarNovoOperario}
       />
 
-      {/* Modal para registrar paro */}
       <ModalRegistroParo
         abierto={modalParoAbierto}
         nombreMaquina={maquina.nombre}
         onCerrar={handleCerrarModalParo}
         onGuardar={handleGuardarParo}
       />
-    </div>
+      </SpotlightCard>
+    </motion.div>
   );
 }
