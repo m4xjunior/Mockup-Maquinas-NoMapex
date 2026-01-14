@@ -69,8 +69,8 @@ export function LoginModalMaquina({
     }
   }, [mostrarPin]);
 
-  // Selección directa sem PIN
-  // Calcular estatísticas das máquinas
+  // Selección directa sin PIN
+  // Calcular estadísticas de las máquinas
   const calcularEstatisticas = () => {
     const activas = maquinas.filter(m => m.estado === 'activa').length;
     const conOF = maquinas.filter(m => m.ordenFabricacion !== null).length;
@@ -171,13 +171,34 @@ export function LoginModalMaquina({
 
   if (!visible) return null;
 
-  // Ordenar máquinas: Produção primeiro, depois fechadas
-  const maquinasOrdenadas = [...maquinas].sort((a, b) => {
-    // Máquinas ativas (produção) primeiro
-    if (a.estado === 'activa' && b.estado !== 'activa') return -1;
-    if (a.estado !== 'activa' && b.estado === 'activa') return 1;
+  const nombresFaltantes = [
+    'Montaje manual 1',
+    'Montaje manual 2',
+    'Sysco',
+    'Sierra vertical',
+    'Lectra',
+    'Limpieza planta',
+  ];
 
-    // Depois por nome
+  const maquinasCompletas = [
+    ...maquinas,
+    ...nombresFaltantes
+      .filter((nombre) => !maquinas.some((m) => m.nombre === nombre))
+      .map((nombre) => ({
+        id: `placeholder-${nombre.toLowerCase().replace(/\s+/g, '-')}`,
+        nombre,
+        tipo: nombre,
+        estado: 'detenida' as const,
+        operario: null,
+        ordenFabricacion: null,
+        contadorPiezas: null,
+        ultimaActualizacion: new Date(),
+      })),
+  ];
+
+  const maquinasOrdenadas = [...maquinasCompletas].sort((a, b) => {
+    if (a.estado === 'activa' && b.estado !== 'activa') return 1;
+    if (a.estado !== 'activa' && b.estado === 'activa') return -1;
     return a.nombre.localeCompare(b.nombre);
   });
 
@@ -185,7 +206,7 @@ export function LoginModalMaquina({
     <>
       {/* Backdrop separado - garante que cliques no fundo fecham o modal */}
       <div
-        className="fixed inset-0 z-50 bg-background/80 backdrop-blur"
+        className="fixed inset-0 z-50 bg-background backdrop-blur"
         onClick={() => onCerrar?.()}
         aria-hidden="true"
       />
@@ -234,7 +255,7 @@ export function LoginModalMaquina({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
               <div className="flex items-start gap-2 text-xs text-blue-800">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">1</span>
-                <p>Selecciona tu <strong>proceso</strong> y el <strong>equipo</strong> de trabalho.</p>
+                <p>Selecciona tu <strong>proceso</strong> y el <strong>equipo de trabajo</strong>.</p>
               </div>
               <div className="flex items-start gap-2 text-xs text-blue-800">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">2</span>
@@ -317,12 +338,12 @@ export function LoginModalMaquina({
 
                 <div className="mt-8 flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold text-slate-900">
-                      Elige el equipo
-                    </h3>
+                <h3 className="text-xl font-semibold text-slate-900">
+                      Elige el puesto de trabajo
+                </h3>
                   </div>
                   <span className="text-sm text-slate-500">
-                    {maquinas.length} máquinas disponibles
+                    {maquinasCompletas.length} máquinas disponibles
                   </span>
                 </div>
 
