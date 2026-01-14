@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ListaMaquinas } from '@/components/produccion/ListaMaquinas';
+import { ListaOperariosSidebar } from '@/components/produccion/ListaOperariosSidebar';
 import { Button } from '@/components/ui/button';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
@@ -176,6 +177,7 @@ export default function Home() {
               <RelojSidebar />
             </div>
           </div>
+          <ListaOperariosSidebar />
         </aside>
 
         {/* Conteúdo principal */}
