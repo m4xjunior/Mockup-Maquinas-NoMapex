@@ -211,21 +211,6 @@ export const TarjetaMaquina = memo(function TarjetaMaquina({
                 <>
                   <BadgeEstado estado={maquina.estado} size="md" />
                   {/* Botones de paro */}
-                  {maquina.estado === 'activa' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 gap-1.5 border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100 hover:text-red-800"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAbrirModalParo(e);
-                      }}
-                    >
-                      <AlertOctagon className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline text-xs font-medium">Paro</span>
-                    </Button>
-                  )}
-
                   {maquina.estado === 'detenida' && tieneParoActivo && (
                     <Button
                       size="sm"
@@ -238,6 +223,21 @@ export const TarjetaMaquina = memo(function TarjetaMaquina({
                     >
                       <Play className="h-3.5 w-3.5" />
                       <span className="hidden sm:inline text-xs font-medium">Reanudar</span>
+                    </Button>
+                  )}
+
+                  {maquina.estado === 'activa' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="hidden h-8 gap-1.5 border-red-200 bg-red-50 px-3 text-red-700 hover:bg-red-100 hover:text-red-800"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAbrirModalParo(e);
+                      }}
+                    >
+                      <AlertOctagon className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline text-xs font-medium">Paro</span>
                     </Button>
                   )}
                 </>
