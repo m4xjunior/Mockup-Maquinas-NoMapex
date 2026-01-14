@@ -356,11 +356,10 @@ export default function Home() {
         onSeleccionarMaquina={setMaquinaSeleccionada}
         onConfirmar={handleConfirmarSesion}
         onCerrar={() => {
-          if (sesionActiva) {
-            setSelectorManualAbierto(false);
-            return;
+          setSelectorManualAbierto(false);
+          if (!sesionActiva) {
+            setSelectorInicialCerrado(true);
           }
-          setSelectorInicialCerrado(true);
         }}
         accionDeshabilitada={accionLoginDeshabilitada}
         estaCargando={cargandoMaquinas}

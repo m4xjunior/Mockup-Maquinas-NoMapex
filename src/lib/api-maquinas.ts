@@ -138,6 +138,39 @@ function mapearMaquinaAPI(maquinaAPI: MaquinaAPI): Maquina {
   };
 }
 
+function normalizarFecha(valor: unknown): Date {
+  if (valor instanceof Date) {
+    return valor;
+  }
+
+  if (typeof valor === 'string' || typeof valor === 'number') {
+    const fecha = new Date(valor);
+    if (!Number.isNaN(fecha.getTime())) {
+      return fecha;
+    }
+  }
+
+  return new Date();
+}
+
+function normalizarMaquina(maquina: Maquina): Maquina {
+  const ordenFabricacion = maquina.ordenFabricacion
+    ? {
+        ...maquina.ordenFabricacion,
+        fechaInicio: normalizarFecha(maquina.ordenFabricacion.fechaInicio),
+        fechaLimite: maquina.ordenFabricacion.fechaLimite
+          ? normalizarFecha(maquina.ordenFabricacion.fechaLimite)
+          : undefined,
+      }
+    : null;
+
+  return {
+    ...maquina,
+    ultimaActualizacion: normalizarFecha(maquina.ultimaActualizacion),
+    ordenFabricacion,
+  };
+}
+
 // Función para buscar máquinas de la API
 async function obtenerMaquinasDesdeWebhook(): Promise<Maquina[]> {
   const response = await fetch('https://n8n.lexusfx.com/webhook/maquinas', {
@@ -202,5 +235,9 @@ export async function obterMaquinasAPI(): Promise<Maquina[]> {
     );
   }
 
-  return payload as Maquina[];
+  if (!Array.isArray(payload)) {
+    return [];
+  }
+
+  return payload.map((maquina) => normalizarMaquina(maquina as Maquina));
 }
