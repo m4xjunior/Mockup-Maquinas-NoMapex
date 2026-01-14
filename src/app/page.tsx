@@ -3,15 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ListaMaquinas } from '@/components/produccion/ListaMaquinas';
-import { ModalNovaOrdenFabricacion } from '@/components/produccion/ModalNovaOrdenFabricacion';
-import { ModalNovaMaquina } from '@/components/produccion/ModalNovaMaquina';
 import { Button } from '@/components/ui/button';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   ultimaActualizacionAtom,
-  agregarMaquinaAtom,
-  asignarOrdenAMaquinaAtom,
-  actualizarOperarioAtom,
   maquinasAtom,
   cargandoAtom,
   operariosAtom,
@@ -19,7 +14,6 @@ import {
 import {
   operarios as operariosMock,
 } from '@/lib/datos-mock';
-import { Plus, FileText } from 'lucide-react';
 import { LoginModalMaquina } from '@/components/produccion/LoginModalMaquina';
 import { ModalMapex } from '@/components/produccion/ModalMapex';
 import { LayoutGrid } from 'lucide-react';
@@ -57,16 +51,11 @@ export default function Home() {
     setMontado(true);
   }, []);
 
-  const agregarMaquina = useSetAtom(agregarMaquinaAtom);
-  const asignarOrdenAMaquina = useSetAtom(asignarOrdenAMaquinaAtom);
-  const actualizarOperario = useSetAtom(actualizarOperarioAtom);
   const maquinas = useAtomValue(maquinasAtom);
   const [operarios, setOperarios] = useAtom(operariosAtom);
   const cargandoMaquinas = useAtomValue(cargandoAtom);
 
   // Estado para controlar los modales
-  const [modalOrdenAbierto, setModalOrdenAbierto] = useState(false);
-  const [modalMaquinaAbierto, setModalMaquinaAbierto] = useState(false);
   const [modalMapexAbierto, setModalMapexAbierto] = useState(false);
   const [sesionActiva, setSesionActiva] = useState<{
     maquinaId: string;
@@ -89,46 +78,6 @@ export default function Home() {
       setMaquinaSeleccionada(null);
     }
   }, [sesionActiva]);
-
-  // Handler para guardar nueva orden de fabricación
-  const handleGuardarOrden = (params: {
-    ordenFabricacion: any;
-    contadorPiezas: any;
-    idMaquina: string;
-    operario: any;
-  }) => {
-    // Asignar la orden a la máquina
-    asignarOrdenAMaquina({
-      idMaquina: params.idMaquina,
-      ordenFabricacion: params.ordenFabricacion,
-      contadorPiezas: params.contadorPiezas,
-    });
-
-    // Si hay operario, asignarlo también
-    if (params.operario) {
-      actualizarOperario({
-        idMaquina: params.idMaquina,
-        operario: params.operario,
-      });
-    }
-  };
-
-  // Handler para guardar nueva máquina
-  const handleGuardarMaquina = (params: {
-    nombre: string;
-    tipo: string;
-    estado: any;
-    operario: any;
-  }) => {
-    agregarMaquina({
-      nombre: params.nombre,
-      tipo: params.tipo,
-      estado: params.estado,
-      operario: params.operario,
-      ordenFabricacion: null,
-      contadorPiezas: null,
-    });
-  };
 
   const modalSeleccionVisible =
     selectorManualAbierto || (!sesionActiva && !selectorInicialCerrado);
@@ -195,38 +144,6 @@ export default function Home() {
             </div>
 
             <div className="flex items-center justify-between gap-3 sm:justify-end">
-              {/* Botones de acción */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={() => setModalOrdenAbierto(true)}
-                  className="gap-2"
-                  size="sm"
-                >
-                  <FileText className="h-4 w-4" />
-                  <span className="hidden sm:inline">Nueva OF</span>
-                </Button>
-                <Button
-                  onClick={() => setModalMaquinaAbierto(true)}
-                  variant="outline"
-                  className="gap-2"
-                  size="sm"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Nueva Máquina</span>
-                </Button>
-                <Button
-                  onClick={handleAbrirSelector}
-                  variant="ghost"
-                  className="gap-2"
-                  size="sm"
-                >
-                  <span className="hidden sm:inline">
-                    {sesionActiva ? 'Cambiar puesto/trabajo' : 'Seleccionar puesto'}
-                  </span>
-                  <span className="sm:hidden">Elegir</span>
-                </Button>
-              </div>
-
               {/* Última actualización */}
               <div className="flex items-center gap-3 border-l border-gray-200 pl-3">
                 <div className="text-right">
@@ -334,19 +251,6 @@ export default function Home() {
       <ModalMapex 
         abierto={modalMapexAbierto} 
         onCerrar={() => setModalMapexAbierto(false)} 
-      />
-      <ModalNovaOrdenFabricacion
-        abierto={modalOrdenAbierto}
-        operariosDisponibles={operarios}
-        onCerrar={() => setModalOrdenAbierto(false)}
-        onGuardar={handleGuardarOrden}
-      />
-
-      <ModalNovaMaquina
-        abierto={modalMaquinaAbierto}
-        operariosDisponibles={operarios}
-        onCerrar={() => setModalMaquinaAbierto(false)}
-        onGuardar={handleGuardarMaquina}
       />
 
       <LoginModalMaquina
