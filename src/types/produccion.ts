@@ -98,18 +98,18 @@ export interface RegistroParo {
 }
 
 /**
- * Tipos de eventos no sistema
+ * Tipos de eventos en el sistema
  */
 export type TipoEvento =
   | 'inicio-paro'
-  | 'fim-paro'
-  | 'troca-of'
-  | 'troca-operario'
-  | 'manutencao-programada'
-  | 'alerta-qualidade';
+  | 'fin-paro'
+  | 'cambio-of'
+  | 'cambio-operario'
+  | 'mantenimiento-programado'
+  | 'alerta-calidad';
 
 /**
- * Evento no timeline de uma máquina
+ * Evento en el timeline de una máquina
  */
 export interface EventoMaquina {
   id: string;
@@ -121,7 +121,7 @@ export interface EventoMaquina {
 }
 
 /**
- * Alerta sobre condição de uma máquina
+ * Alerta sobre condición de una máquina
  */
 export interface Alerta {
   id: string;
@@ -129,7 +129,7 @@ export interface Alerta {
   severidade: 'low' | 'medium' | 'high' | 'critical';
   mensagem: string;
   timestamp: Date;
-  acao?: {
+  accion?: {
     label: string;
     handler: () => void;
   };

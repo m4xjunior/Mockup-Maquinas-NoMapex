@@ -11,13 +11,13 @@ export function useUltimosEventos(maquinaId: string, limit: number = 3): EventoM
   const obtenerHistorialParos = useAtomValue(historialParosMaquinaAtom);
 
   const eventos = useMemo(() => {
-    const parosDaMaquina = obtenerHistorialParos(maquinaId);
-    const eventosGerados: EventoMaquina[] = [];
+    const parosDeLaMaquina = obtenerHistorialParos(maquinaId);
+    const eventosGenerados: EventoMaquina[] = [];
 
     // Convertir paradas en eventos
-    parosDaMaquina.forEach((paro) => {
+    parosDeLaMaquina.forEach((paro) => {
       // Evento de inicio de paro
-      eventosGerados.push({
+      eventosGenerados.push({
         id: `inicio-${paro.id}`,
         maquinaId,
         tipo: 'inicio-paro' as TipoEvento,
@@ -32,22 +32,22 @@ export function useUltimosEventos(maquinaId: string, limit: number = 3): EventoM
 
       // Evento de fin de paro (si ya fue finalizado)
       if (paro.fechaFin) {
-        eventosGerados.push({
-          id: `fim-${paro.id}`,
+        eventosGenerados.push({
+          id: `fin-${paro.id}`,
           maquinaId,
-          tipo: 'fim-paro' as TipoEvento,
+          tipo: 'fin-paro' as TipoEvento,
           timestamp: paro.fechaFin,
           descricao: `Paro finalizado: ${paro.duracionMinutos || 0} min`,
           metadata: {
             paroId: paro.id,
-            duracao: paro.duracionMinutos,
+            duracion: paro.duracionMinutos,
           },
         });
       }
     });
 
     // Ordenar eventos por timestamp (más reciente primero)
-    return eventosGerados
+    return eventosGenerados
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit);
   }, [obtenerHistorialParos, maquinaId, limit]);

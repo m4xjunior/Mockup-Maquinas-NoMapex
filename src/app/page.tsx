@@ -148,7 +148,7 @@ export default function Home() {
     });
     setSelectorManualAbierto(false);
 
-    // Fazer scroll para a máquina selecionada
+    // Hacer scroll hacia la máquina seleccionada
     setTimeout(() => {
       const elementoMaquina = document.getElementById(`maquina-${maquinaSeleccionada}`);
       if (elementoMaquina) {
@@ -269,7 +269,7 @@ export default function Home() {
               <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
-                    Puesto de trabalho activo
+                    Puesto de trabajo activo
                   </p>
                   {sesionActiva && maquinaSesion ? (
                     <>

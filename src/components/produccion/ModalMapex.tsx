@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Maquina } from '@/types/produccion';
+import { EstadoMaquina, Maquina } from '@/types/produccion';
 import { obtenerMaquinasMapex } from '@/lib/datos-mock';
 import { TarjetaMaquina } from './TarjetaMaquina';
 import { 
@@ -73,6 +73,20 @@ export function ModalMapex({ abierto, onCerrar }: ModalMapexProps) {
     m.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
     m.ordenFabricacion?.numero.toLowerCase().includes(filtro.toLowerCase())
   );
+
+  const ordenEstados: Record<EstadoMaquina, number> = {
+    activa: 0,
+    mantenimiento: 1,
+    detenida: 2,
+  };
+
+  const maquinasOrdenadas = [...maquinasFiltradas].sort((a, b) => {
+    const orden = ordenEstados[a.estado] - ordenEstados[b.estado];
+    if (orden !== 0) {
+      return orden;
+    }
+    return a.nombre.localeCompare(b.nombre, 'es');
+  });
 
   return (
     <div
@@ -175,7 +189,7 @@ export function ModalMapex({ abierto, onCerrar }: ModalMapexProps) {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {maquinasFiltradas.map((maquina) => (
+                {maquinasOrdenadas.map((maquina) => (
                   <TarjetaMaquina
                     key={maquina.id}
                     maquina={maquina}
@@ -191,4 +205,3 @@ export function ModalMapex({ abierto, onCerrar }: ModalMapexProps) {
     </div>
   );
 }
-

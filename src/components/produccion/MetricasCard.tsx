@@ -19,7 +19,7 @@ interface MetricasCardProps {
 /**
  * Componente que muestra métricas visuales de producción de la máquina
  * Incluye: barra de progreso con shimmer, piezas producidas, objetivo, eficiencia
- * Otimizado para monitores industriais com números grandes e animados
+ * Optimizado para monitores industriales con números grandes y animados
  */
 export function MetricasCard({ maquina, variant = 'default', className }: MetricasCardProps) {
   const metricas = useMetricasMaquina(maquina.id);
@@ -28,14 +28,14 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
     return null;
   }
 
-  const { producidas, objetivo, porcentagem, pecasRestantes, eficiencia, tempoEstimadoRestante } = metricas;
+  const { producidas, objetivo, porcentaje, piezasRestantes, eficiencia, tiempoEstimadoRestante } = metricas;
 
   // Determinar color de la barra de progreso basado en el porcentaje
   const getProgressColor = () => {
-    if (porcentagem >= 90) return 'from-emerald-600 to-emerald-500';
-    if (porcentagem >= 70) return 'from-emerald-500 to-emerald-400';
-    if (porcentagem >= 50) return 'from-blue-500 to-blue-400';
-    if (porcentagem >= 30) return 'from-amber-500 to-amber-400';
+    if (porcentaje >= 90) return 'from-emerald-600 to-emerald-500';
+    if (porcentaje >= 70) return 'from-emerald-500 to-emerald-400';
+    if (porcentaje >= 50) return 'from-blue-500 to-blue-400';
+    if (porcentaje >= 30) return 'from-amber-500 to-amber-400';
     return 'from-red-500 to-red-400';
   };
 
@@ -47,14 +47,14 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
     return 'danger';
   };
 
-  // Configuração baseada na variante
+  // Configuración basada en la variante
   const isIndustrial = variant === 'industrial';
   const barHeight = isIndustrial ? 'h-4' : 'h-3';
   const metricSize = isIndustrial ? 'lg' : 'md';
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Barra de progreso animada - mais grossa para industrial */}
+      {/* Barra de progreso animada - más gruesa para industrial */}
       <div className="space-y-2">
         <div className={cn(
           'flex items-center justify-between',
@@ -63,7 +63,7 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
           <span className="font-medium text-gray-600">Progreso</span>
           <div className="flex items-center gap-2">
             <CountUp
-              to={porcentagem}
+              to={porcentaje}
               duration={1.5}
               suffix="%"
               className={cn(
@@ -80,7 +80,7 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
         )}>
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: `${Math.min(porcentagem, 100)}%` }}
+            animate={{ width: `${Math.min(porcentaje, 100)}%` }}
             transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
             className={cn(
               'absolute inset-y-0 left-0 rounded-full',
@@ -93,7 +93,7 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
           </motion.div>
         </div>
 
-        {/* Indicadores numéricos abaixo da barra */}
+        {/* Indicadores numéricos debajo de la barra */}
         <div className="flex justify-between text-xs text-gray-500">
           <span>
             <CountUp to={producidas} duration={1.2} className="font-semibold" /> producidas
@@ -104,7 +104,7 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
         </div>
       </div>
 
-      {/* Grid de métricas principales - 2 colunas para industrial */}
+      {/* Grid de métricas principales - 2 columnas para industrial */}
       <div className={cn(
         'grid gap-2',
         isIndustrial ? 'grid-cols-2' : 'grid-cols-3'
@@ -126,9 +126,9 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
         {!isIndustrial && (
           <MetricaBadge
             label="Restantes"
-            value={pecasRestantes}
+            value={piezasRestantes}
             icon={<TrendingUp className="h-4 w-4" />}
-            variant={pecasRestantes === 0 ? 'success' : 'warning'}
+            variant={piezasRestantes === 0 ? 'success' : 'warning'}
             size={metricSize}
           />
         )}
@@ -142,9 +142,9 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
         {isIndustrial && (
           <MetricaBadge
             label="Restantes"
-            value={pecasRestantes}
+            value={piezasRestantes}
             icon={<TrendingUp className="h-5 w-5" />}
-            variant={pecasRestantes === 0 ? 'success' : 'warning'}
+            variant={piezasRestantes === 0 ? 'success' : 'warning'}
             size={metricSize}
           />
         )}
@@ -158,10 +158,10 @@ export function MetricasCard({ maquina, variant = 'default', className }: Metric
           animated={false}
         />
 
-        {tempoEstimadoRestante && (
+        {tiempoEstimadoRestante && (
           <MetricaBadge
             label="Tiempo Est."
-            value={tempoEstimadoRestante}
+            value={tiempoEstimadoRestante}
             icon={<Clock className={isIndustrial ? 'h-5 w-5' : 'h-4 w-4'} />}
             variant="default"
             size={metricSize}

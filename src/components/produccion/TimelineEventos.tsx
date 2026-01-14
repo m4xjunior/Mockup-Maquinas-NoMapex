@@ -6,7 +6,7 @@ import { Maquina, TipoEvento } from '@/types/produccion';
 import { useUltimosEventos } from '@/hooks/useUltimosEventos';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { es } from 'date-fns/locale';
 
 interface TimelineEventosProps {
   maquina: Maquina;
@@ -17,19 +17,19 @@ interface TimelineEventosProps {
 /**
  * Mapeo de colores por tipo de evento
  */
-const getCorEvento = (tipo: TipoEvento): string => {
+const getColorEvento = (tipo: TipoEvento): string => {
   switch (tipo) {
     case 'inicio-paro':
       return 'bg-red-500';
-    case 'fim-paro':
+    case 'fin-paro':
       return 'bg-emerald-500';
-    case 'troca-of':
+    case 'cambio-of':
       return 'bg-blue-500';
-    case 'troca-operario':
+    case 'cambio-operario':
       return 'bg-purple-500';
-    case 'manutencao-programada':
+    case 'mantenimiento-programado':
       return 'bg-amber-500';
-    case 'alerta-qualidade':
+    case 'alerta-calidad':
       return 'bg-orange-500';
     default:
       return 'bg-gray-500';
@@ -39,11 +39,11 @@ const getCorEvento = (tipo: TipoEvento): string => {
 /**
  * Formatea timestamp para visualización relativa
  */
-const formatarTempo = (timestamp: Date): string => {
+const formatearTiempo = (timestamp: Date): string => {
   try {
     return formatDistanceToNow(timestamp, {
       addSuffix: true,
-      locale: ptBR,
+      locale: es,
     });
   } catch {
     return timestamp.toLocaleTimeString('es-ES', {
@@ -90,7 +90,7 @@ export function TimelineEventos({ maquina, limit = 3, className }: TimelineEvent
               <div
                 className={cn(
                   'h-2 w-2 rounded-full flex-shrink-0 shadow-sm',
-                  getCorEvento(evento.tipo)
+                  getColorEvento(evento.tipo)
                 )}
               />
               {idx < eventos.length - 1 && (
@@ -104,7 +104,7 @@ export function TimelineEventos({ maquina, limit = 3, className }: TimelineEvent
                 {evento.descricao}
               </p>
               <p className="text-[10px] text-gray-400 mt-0.5">
-                {formatarTempo(evento.timestamp)}
+                {formatearTiempo(evento.timestamp)}
               </p>
             </div>
           </motion.div>

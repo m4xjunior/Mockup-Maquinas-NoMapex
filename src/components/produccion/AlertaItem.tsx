@@ -35,8 +35,8 @@ const severidadeConfig = {
 };
 
 /**
- * Item individual de alerta no popover
- * Mostra severidade, mensagem e ação opcional
+ * Item individual de alerta en el popover
+ * Muestra severidad, mensaje y acción opcional
  */
 export function AlertaItem({ alerta, onDismiss }: AlertaItemProps) {
   const config = severidadeConfig[alerta.severidade];
@@ -62,14 +62,14 @@ export function AlertaItem({ alerta, onDismiss }: AlertaItemProps) {
           })}
         </p>
 
-        {alerta.acao && (
+        {alerta.accion && (
           <Button
             size="sm"
             variant="outline"
             className="mt-2 h-7 text-xs"
-            onClick={alerta.acao.handler}
+            onClick={alerta.accion.handler}
           >
-            {alerta.acao.label}
+            {alerta.accion.label}
           </Button>
         )}
       </div>

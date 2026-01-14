@@ -12,22 +12,39 @@ interface ProducaoInlineProps {
 }
 
 /**
- * Componente para mostrar produção em layout horizontal
- * Números GRANDES visíveis a distância
- * Barra de progresso grossa
+ * Componente para mostrar producción en layout horizontal
+ * Números destacados y barra de progreso compacta
  */
 export function ProducaoInline({
   contadorPiezas,
   ordenFabricacion,
   className,
 }: ProducaoInlineProps) {
-  // Se não tem contador, mostrar mensagem
+  // Si no tiene contador, mostrar mensaje
   if (!contadorPiezas || !ordenFabricacion) {
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'H3',
+        location: 'ProducaoInline.tsx:missingData',
+        message: 'Datos de producción incompletos',
+        data: {
+          tieneContador: Boolean(contadorPiezas),
+          tieneOrden: Boolean(ordenFabricacion),
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
     return (
       <div className={cn('flex items-center gap-4', className)}>
         <div className="flex items-center gap-2 text-gray-400">
           <Package className="h-6 w-6" />
-          <span className="text-lg font-medium">Sem ordem de fabricação ativa</span>
+          <span className="text-lg font-medium">Sin orden de fabricación activa</span>
         </div>
       </div>
     );
@@ -36,73 +53,64 @@ export function ProducaoInline({
   const { producidas, total, porcentaje } = contadorPiezas;
   const restantes = total - producidas;
 
-  // Cor da barra baseada no progresso
+  // Color de la barra basado en el progreso
   const getProgressColor = () => {
-    if (porcentaje >= 90) return 'from-emerald-500 to-emerald-400';
-    if (porcentaje >= 70) return 'from-emerald-400 to-emerald-300';
-    if (porcentaje >= 50) return 'from-blue-500 to-blue-400';
-    if (porcentaje >= 30) return 'from-amber-500 to-amber-400';
-    return 'from-red-500 to-red-400';
+    if (porcentaje >= 90) return 'bg-emerald-500';
+    if (porcentaje >= 70) return 'bg-emerald-400';
+    if (porcentaje >= 50) return 'bg-blue-500';
+    if (porcentaje >= 30) return 'bg-amber-500';
+    return 'bg-red-500';
   };
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      {/* Linha superior: OF e números */}
+      {/* Línea superior: OF y números */}
       <div className="flex items-center justify-between gap-4">
         {/* OF */}
-        <div className="flex items-center gap-2 text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
-          <FileText className="h-5 w-5" />
-          <span className="font-bold text-sm">{ordenFabricacion.numero}</span>
+        <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-gray-600">
+          <FileText className="h-4 w-4" />
+          <span className="text-xs font-semibold">{ordenFabricacion.numero}</span>
         </div>
 
-        {/* Números de produção - ENORMES */}
+        {/* Números de producción - ENORMES */}
         <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-black tabular-nums text-gray-900">
+          <span className="text-3xl font-semibold tabular-nums text-gray-900">
             {producidas.toLocaleString('es-ES')}
           </span>
-          <span className="text-2xl font-medium text-gray-400">/</span>
-          <span className="text-2xl font-bold tabular-nums text-gray-600">
+          <span className="text-xl font-medium text-gray-400">/</span>
+          <span className="text-xl font-semibold tabular-nums text-gray-500">
             {total.toLocaleString('es-ES')}
           </span>
         </div>
       </div>
 
-      {/* Barra de progresso GROSSA */}
-      <div className="relative h-5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+      {/* Barra de progreso compacta */}
+      <div className="relative h-2.5 rounded-full bg-gray-100 overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(porcentaje, 100)}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className={cn(
-            'absolute inset-y-0 left-0 rounded-full',
-            'bg-gradient-to-r',
-            getProgressColor()
-          )}
-        >
-          {/* Shimmer effect */}
-          <div className="absolute inset-0 animate-shimmer" />
-        </motion.div>
-
-        {/* Porcentagem dentro da barra */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-sm font-bold text-gray-700 drop-shadow-sm">
-            {porcentaje}%
-          </span>
-        </div>
+          className={cn('absolute inset-y-0 left-0 rounded-full', getProgressColor())}
+        />
       </div>
 
-      {/* Linha inferior: Restantes */}
-      <div className="flex items-center justify-between text-sm">
+      {/* Línea inferior: Restantes */}
+      <div className="flex items-center justify-between text-xs text-gray-500">
         <span className="text-gray-500">
-          Faltam: <span className="font-bold text-gray-700">{restantes.toLocaleString('es-ES')}</span> peças
+          Faltan:{' '}
+          <span className="font-semibold text-gray-700">
+            {restantes.toLocaleString('es-ES')}
+          </span>{' '}
+          piezas
         </span>
-        
-        {porcentaje >= 100 && (
-          <span className="text-emerald-600 font-bold">
-            ✓ Objetivo alcançado!
-          </span>
-        )}
+        <span className="font-medium text-gray-600">{porcentaje}%</span>
       </div>
+
+      {porcentaje >= 100 && (
+        <span className="text-xs font-medium text-emerald-600">
+          ✓ ¡Objetivo alcanzado!
+        </span>
+      )}
     </div>
   );
 }

@@ -13,6 +13,28 @@ export const errorAtom = atom<string | null>(null);
 // Timestamp de la última actualización
 export const ultimaActualizacionAtom = atom<Date>(new Date());
 
+// IDs de las máquinas expandidas (para el accordion)
+export const maquinasExpandidasAtom = atom<Set<string>>(new Set<string>());
+
+// Atom derivado para toggle de expansión
+export const toggleExpansionAtom = atom(
+  null,
+  (get, set, idMaquina: string) => {
+    const expandidas = new Set<string>(get(maquinasExpandidasAtom));
+    if (expandidas.has(idMaquina)) {
+      expandidas.delete(idMaquina);
+    } else {
+      expandidas.add(idMaquina);
+    }
+    set(maquinasExpandidasAtom, expandidas);
+  }
+);
+
+// Atom para verificar si una máquina está expandida
+export const esMaquinaExpandidaAtom = atom((get) => (idMaquina: string) => {
+  return get(maquinasExpandidasAtom).has(idMaquina);
+});
+
 // IDs de las máquinas en modo edición
 export const maquinasEnEdicionAtom = atom<Set<string>>(new Set<string>());
 

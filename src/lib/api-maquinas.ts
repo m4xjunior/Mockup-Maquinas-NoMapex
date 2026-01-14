@@ -1,6 +1,6 @@
 import { Maquina, Operario, OrdenFabricacion, ContadorPiezas } from '@/types/produccion';
 
-// Tipo para o retorno da API
+// Tipo para el retorno de la API
 interface MaquinaAPI {
   info_maquina: {
     codigo: string;
@@ -45,7 +45,7 @@ interface MaquinaAPI {
   };
 }
 
-// Mapear actividad da API para estado do sistema
+// Mapear actividad de la API al estado del sistema
 function mapearEstado(actividad: string): 'activa' | 'detenida' | 'mantenimiento' {
   switch (actividad.toUpperCase()) {
     case 'PRODUCCION':
@@ -59,23 +59,23 @@ function mapearEstado(actividad: string): 'activa' | 'detenida' | 'mantenimiento
   }
 }
 
-// Criar operario a partir do nome
+// Crear operario a partir del nombre
 function criarOperario(nombreOperador: string): Operario | null {
   if (!nombreOperador || nombreOperador === '' || nombreOperador === '--') {
     return null;
   }
 
-  // Gerar um ID único baseado no nome
+  // Generar un ID único basado en el nombre
   const id = `op-${nombreOperador.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
   return {
     id,
     nombre: nombreOperador,
-    codigo: id.substring(0, 10), // Usar parte do ID como código
+    codigo: id.substring(0, 10), // Usar parte del ID como código
   };
 }
 
-// Criar orden de fabricación a partir dos dados da API
+// Crear orden de fabricación a partir de los datos de la API
 function criarOrdenFabricacion(
   numeroOF: string,
   producto: { codigo: string; descripcion: string },
@@ -90,13 +90,13 @@ function criarOrdenFabricacion(
     numero: numeroOF,
     nombrePieza: producto.descripcion !== '--' ? producto.descripcion : 'Sin descripción',
     numeroPieza: producto.codigo !== '--' ? producto.codigo : '',
-    cantidadObjetivo: 0, // Não disponível na API
+    cantidadObjetivo: 0, // No disponible en la API
     fechaInicio: new Date(fechas.fecha_inicio_of),
     fechaLimite: fechas.fecha_fin_of ? new Date(fechas.fecha_fin_of) : undefined,
   };
 }
 
-// Criar contador de piezas a partir dos dados da API
+// Crear contador de piezas a partir de los datos de la API
 function criarContadorPiezas(
   produccionOF: { unidades_ok: number; unidades_nok: number; unidades_repro: number },
   planning: number
@@ -117,7 +117,7 @@ function criarContadorPiezas(
   };
 }
 
-// Mapear dados da API para o formato Maquina
+// Mapear datos de la API al formato Maquina
 function mapearMaquinaAPI(maquinaAPI: MaquinaAPI): Maquina {
   return {
     id: maquinaAPI.info_maquina.codigo,
@@ -138,31 +138,69 @@ function mapearMaquinaAPI(maquinaAPI: MaquinaAPI): Maquina {
   };
 }
 
-// Função para buscar máquinas da API
-export async function obterMaquinasAPI(): Promise<Maquina[]> {
-  try {
-    const response = await fetch('https://n8n.lexusfx.com/webhook/maquinas', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // Adicionar cache: 'no-store' para garantir dados frescos
-      cache: 'no-store',
-    });
+// Función para buscar máquinas de la API
+async function obtenerMaquinasDesdeWebhook(): Promise<Maquina[]> {
+  const response = await fetch('https://n8n.lexusfx.com/webhook/maquinas', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+  });
 
-    if (!response.ok) {
-      throw new Error(`Erro ao buscar máquinas: ${response.status} ${response.statusText}`);
+  const text = await response.text();
+  let parsed: MaquinaAPI[] = [];
+  if (text) {
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parsed = [];
     }
-
-    const data: MaquinaAPI[] = await response.json();
-
-    // Mapear os dados da API para o formato Maquina
-    const maquinas = data.map(mapearMaquinaAPI);
-
-    return maquinas;
-  } catch (error) {
-    console.error('Erro ao buscar máquinas da API:', error);
-    // Em caso de erro, retornar array vazio
-    return [];
   }
+
+  // #region agent log
+  fetch('http://127.0.0.1:7244/ingest/646fdcbc-8512-4d15-97f0-5f9868008689', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId: 'debug-session',
+      runId: 'run1',
+      hypothesisId: 'H4',
+      location: 'api-maquinas.ts:obtenerMaquinasDesdeWebhook',
+      message: 'Respuesta del webhook de máquinas',
+      data: {
+        status: response.status,
+        statusText: response.statusText,
+        bodyPreview: text?.slice(0, 120),
+      },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
+
+  if (!response.ok) {
+    throw new Error(`Error al buscar máquinas: ${response.status} ${response.statusText}`);
+  }
+
+  return parsed.map(mapearMaquinaAPI);
+}
+
+export async function fetchMaquinasDesdeWebhook(): Promise<Maquina[]> {
+  return obtenerMaquinasDesdeWebhook();
+}
+
+export async function obterMaquinasAPI(): Promise<Maquina[]> {
+  const response = await fetch('/api/maquinas', {
+    method: 'POST',
+    cache: 'no-store',
+  });
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.error ? String(payload.error) : 'Error al cargar las máquinas del servidor'
+    );
+  }
+
+  return payload as Maquina[];
 }
