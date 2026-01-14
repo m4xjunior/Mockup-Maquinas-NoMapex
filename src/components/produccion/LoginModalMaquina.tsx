@@ -236,13 +236,13 @@ export function LoginModalMaquina({
           <header className="flex flex-col justify-between gap-4 md:flex-row md:items-start pt-8 sm:pt-0">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                Inicio operativo
+                INICIO OPERATIVO
               </p>
               <h2 className="mt-2 text-3xl font-semibold text-slate-900">
-                Configuración de Trabajo
+                CONFIGURACIÓN DE TRABAJO
               </h2>
               <p className="mt-2 text-sm text-slate-500">
-                Siga los pasos a continuación para vincular su producción al sistema y asegurar que todas las piezas sean contabilizadas correctamente.
+                SIGA LOS PASOS A CONTINUACIÓN PARA VINCULAR SU PRODUCCIÓN AL SISTEMA Y ASEGURAR QUE TODAS LAS PIEZAS SEAN CONTABILIZADAS CORRECTAMENTE.
               </p>
             </div>
           </header>
@@ -250,20 +250,20 @@ export function LoginModalMaquina({
           <div className="rounded-2xl bg-blue-50/50 p-4 border border-blue-100">
             <h4 className="text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
               <Info className="h-4 w-4 text-blue-500" />
-              ¿Qué debo hacer para empezar?
+              ¿QUÉ DEBO HACER PARA EMPEZAR?
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
               <div className="flex items-start gap-2 text-xs text-blue-800">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">1</span>
-                <p>Selecciona tu <strong>proceso</strong> y el <strong>equipo de trabajo</strong>.</p>
+                <p>SELECCIONA TU <strong>PROCESO</strong> Y EL <strong>PUESTO DE TRABAJO</strong>.</p>
               </div>
               <div className="flex items-start gap-2 text-xs text-blue-800">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">2</span>
-                <p>Haz clic en <strong>"Iniciar monitoreo"</strong> al final de la página.</p>
+                <p>HAZ CLIC EN <strong>"INICIAR MONITOREO"</strong> AL FINAL DE LA PÁGINA.</p>
               </div>
               <div className="flex items-start gap-2 text-xs text-blue-800">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold">3</span>
-                <p>Identifícate introduciendo tu <strong>código de operario</strong>.</p>
+                <p>IDENTIFÍCATE INTRODUCIENDO TU <strong>CÓDIGO DE OPERARIO</strong>.</p>
               </div>
             </div>
           </div>
@@ -278,10 +278,10 @@ export function LoginModalMaquina({
               <section>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
-                    Paso 1
+                    PASO 1
                   </p>
                   <h3 className="text-xl font-semibold text-slate-900">
-                    Selecciona el proceso
+                    SELECCIONA EL PROCESO
                   </h3>
                 </div>
                 <div className="mt-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
@@ -305,10 +305,10 @@ export function LoginModalMaquina({
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-semibold text-slate-900">
-                              {tipo.label}
+                              {tipo.label.toUpperCase()}
                             </p>
                             <p className="text-xs uppercase tracking-wide text-slate-500">
-                              Proceso de {tipo.label.toLowerCase()}
+                              PROCESO DE {tipo.label.toUpperCase()}
                             </p>
                           </div>
                           {estaSeleccionado ? (
@@ -321,14 +321,14 @@ export function LoginModalMaquina({
                         <div className="mt-4 space-y-2 border-t border-slate-100 pt-3">
                           <div className="flex items-center gap-2 text-[11px] text-slate-600">
                             <ActivitySquare className="h-3 w-3 text-emerald-500" />
-                            <span className="font-medium">Activas:</span>
-                            <span className="font-bold text-emerald-600">{stats.activas} máquinas</span>
+                            <span className="font-medium">ACTIVAS:</span>
+                            <span className="font-bold text-emerald-600">{stats.activas} MÁQUINAS</span>
                           </div>
 
                           <div className="flex items-center gap-2 text-[11px] text-slate-600">
                             <FileText className="h-3 w-3 text-blue-500" />
-                            <span className="font-medium">Con OF:</span>
-                            <span>{stats.ofs} de {stats.total}</span>
+                            <span className="font-medium">CON OF:</span>
+                            <span>{stats.ofs} DE {stats.total}</span>
                           </div>
                         </div>
                       </motion.button>
