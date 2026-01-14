@@ -335,6 +335,8 @@ export const TarjetaMaquina = memo(function TarjetaMaquina({
                 </h4>
                 <InfoOrdenFabricacion
                   ordenFabricacion={maquina.ordenFabricacion}
+                  codigoOperario={maquina.operario?.codigo ?? null}
+                  puestoId={maquina.id}
                 />
               </div>
 

@@ -1,18 +1,40 @@
+ 'use client';
+
 import { OrdenFabricacion } from '@/types/produccion';
 import { FileText, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
 
 interface InfoOrdenFabricacionProps {
   ordenFabricacion: OrdenFabricacion | null;
+  codigoOperario?: string | null;
+  puestoId?: string | null;
   className?: string;
 }
 
 export function InfoOrdenFabricacion({
   ordenFabricacion,
+  codigoOperario,
+  puestoId,
   className,
 }: InfoOrdenFabricacionProps) {
+  const handleRedireccion = () => {
+    const baseUrl = 'http://10.0.0.66/mrpii/indexkhv2.html';
+    const params = new URLSearchParams();
+
+    if (codigoOperario) {
+      params.set('id_operario', codigoOperario);
+    }
+
+    if (puestoId) {
+      params.set('puesto', puestoId);
+    }
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.location.href = url;
+  };
   // Estado sin orden de fabricación
   if (!ordenFabricacion) {
     return (
@@ -80,6 +102,17 @@ export function InfoOrdenFabricacion({
           </span>
         </div>
       )}
+    <div className="flex justify-end">
+      <Button
+        size="sm"
+        variant="outline"
+        className="px-4 text-xs font-semibold"
+        onClick={handleRedireccion}
+        disabled={!codigoOperario}
+      >
+        Ir a la siguiente pantalla
+      </Button>
+    </div>
     </div>
   );
 }
