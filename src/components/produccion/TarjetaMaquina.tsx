@@ -192,17 +192,17 @@ export const TarjetaMaquina = memo(function TarjetaMaquina({
                     estaExpandida ? "text-2xl" : "text-sm"
                   )}
                 >
-                  {maquina.nombre}
+                  {maquina.tipo}
                 </h3>
                 {estaExpandida && (
                   <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    {maquina.tipo}
+                    {maquina.nombre}
                   </span>
                 )}
               </div>
               {!estaExpandida && (
                 <p className="text-xs uppercase tracking-wide text-slate-500 mt-0.5">
-                  {maquina.tipo}
+                  {maquina.nombre}
                 </p>
               )}
             </div>
