@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
+import { useAtomValue } from 'jotai';
+import { operarioSesionAtom } from '@/lib/atoms/produccion';
 
 interface InfoOrdenFabricacionProps {
   ordenFabricacion: OrdenFabricacion | null;
@@ -20,12 +22,14 @@ export function InfoOrdenFabricacion({
   puestoId,
   className,
 }: InfoOrdenFabricacionProps) {
+  const operarioSesion = useAtomValue(operarioSesionAtom);
+  const codigoOperarioReal = codigoOperario ?? operarioSesion?.codigo ?? null;
   const handleRedireccion = () => {
     const baseUrl = 'http://10.0.0.66/mrpii/indexkhv2.html';
     const params = new URLSearchParams();
 
-    if (codigoOperario) {
-      params.set('id_operario', codigoOperario);
+    if (codigoOperarioReal) {
+      params.set('id_operario', codigoOperarioReal);
     }
 
     if (puestoId) {
@@ -108,7 +112,7 @@ export function InfoOrdenFabricacion({
         variant="outline"
         className="px-4 text-xs font-semibold"
         onClick={handleRedireccion}
-        disabled={!codigoOperario}
+        disabled={!codigoOperarioReal}
       >
         Ir a la siguiente pantalla
       </Button>

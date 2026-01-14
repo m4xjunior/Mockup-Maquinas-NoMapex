@@ -276,3 +276,5 @@ export const agregarOperarioAtom = atom(
     set(operariosAtom, [...operarios, operarioConId]);
   }
 );
+
+export const operarioSesionAtom = atom<Operario | null>(null);

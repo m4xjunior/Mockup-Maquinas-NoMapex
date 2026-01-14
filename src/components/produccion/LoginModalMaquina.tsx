@@ -22,6 +22,8 @@ import {
   UserCheck,
   Info,
 } from 'lucide-react';
+import { useSetAtom } from 'jotai';
+import { operarioSesionAtom } from '@/lib/atoms/produccion';
 
 interface LoginModalMaquinaProps {
   visible: boolean;
@@ -60,6 +62,7 @@ export function LoginModalMaquina({
   const [pin, setPin] = useState('');
   const [errorPin, setErrorPin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const setOperarioSesion = useSetAtom(operarioSesionAtom);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -133,6 +136,7 @@ export function LoginModalMaquina({
         codigo: pin
       };
     }
+    setOperarioSesion(operarioEncontrado);
 
     // PIN válido
     toast.success(`Bienvenido, ${operarioEncontrado.nombre}`);
