@@ -291,39 +291,10 @@ export const TarjetaMaquina = memo(function TarjetaMaquina({
             <div className="space-y-3 border-t px-3 py-3">
               {/* Información del operario */}
               <div>
-                <div className="mb-1.5 flex items-center justify-between">
+                <div className="mb-1.5">
                   <h4 className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
                     Operario en Turno
                   </h4>
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-6 gap-1 px-1.5 text-[10px]"
-                      onClick={handleAbrirModalOperario}
-                    >
-                      {maquina.operario ? (
-                        <>
-                          <Pencil className="h-2.5 w-2.5" />
-                          Editar
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus className="h-2.5 w-2.5" />
-                          Agregar
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-6 gap-1 px-1.5 text-[10px]"
-                      onClick={handleAbrirModalNovoOperario}
-                    >
-                      <Plus className="h-2.5 w-2.5" />
-                      Nuevo
-                    </Button>
-                  </div>
                 </div>
                 <InfoOperario operario={maquina.operario} />
               </div>
@@ -343,21 +314,10 @@ export const TarjetaMaquina = memo(function TarjetaMaquina({
               {/* Contador de piezas */}
               {maquina.contadorPiezas && (
                 <div>
-                  <div className="mb-1.5 flex items-center justify-between">
+                  <div className="mb-1.5">
                     <h4 className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Progreso
                     </h4>
-                    {tieneContadorPiezas && !enModoEdicion && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-6 gap-1 px-1.5 text-[10px]"
-                        onClick={handleClickEditar}
-                      >
-                        <Pencil className="h-2.5 w-2.5" />
-                        Editar
-                      </Button>
-                    )}
                   </div>
 
                   {enModoEdicion ? (

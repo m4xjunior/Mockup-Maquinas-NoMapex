@@ -86,7 +86,7 @@ export function InfoOrdenFabricacion({
         </div>
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Meta
+            Total unidades OF
           </p>
           <p className="mt-1 text-sm font-medium">
             {ordenFabricacion.cantidadObjetivo} unidades
@@ -98,7 +98,7 @@ export function InfoOrdenFabricacion({
       {ordenFabricacion.fechaLimite && (
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Límite:</span>
+          <span className="text-muted-foreground">Fecha Inicio:</span>
           <span className="font-medium">
             {format(ordenFabricacion.fechaLimite, "d 'de' MMMM, yyyy", {
               locale: es,

@@ -216,17 +216,23 @@ export function LoginModalMaquina({
       />
       
       {/* Container do modal - posicionado acima do backdrop */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center sm:px-4 sm:py-8 pointer-events-none">
+      <div 
+        className="fixed inset-0 z-[51] flex items-center justify-center sm:px-4 sm:py-8 pointer-events-none"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div 
-          className="relative w-full max-w-2xl sm:rounded-[32px] border-slate-200 bg-card shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none border-0 sm:border pointer-events-auto"
+          className="relative w-full max-w-2xl border-slate-200 bg-card shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none border-0 sm:border pointer-events-auto"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.37)' }}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           {/* Botão X com área de toque expandida para uso industrial */}
           {onCerrar && (
             <button
               type="button"
               aria-label="Cerrar modal"
-              onClick={() => onCerrar()}
-              className="absolute right-3 top-3 z-[100] inline-flex h-14 w-14 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-slate-600 shadow-xl transition-all duration-150 active:scale-95 active:bg-slate-100 hover:bg-slate-50 hover:border-slate-300 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 touch-manipulation"
+              onClick={onCerrar}
+              className="absolute right-3 top-3 z-[101] inline-flex h-14 w-14 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-slate-600 shadow-xl transition-all duration-150 active:scale-95 active:bg-slate-100 hover:bg-slate-50 hover:border-slate-300 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 touch-manipulation"
+              onMouseDown={(e) => e.stopPropagation()}
             >
               <X className="h-7 w-7" strokeWidth={2.5} />
             </button>
@@ -452,7 +458,7 @@ export function LoginModalMaquina({
       {/* Modal de PIN Operario - fora do container principal */}
       {mostrarPin && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[62] flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setMostrarPin(false);
