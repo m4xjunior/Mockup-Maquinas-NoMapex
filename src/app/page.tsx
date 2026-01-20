@@ -11,6 +11,7 @@ import {
   maquinasAtom,
   cargandoAtom,
   operariosAtom,
+  vemDoMRPIIAtom,
 } from '@/lib/atoms/produccion';
 import {
   operarios as operariosMock,
@@ -55,6 +56,7 @@ export default function Home() {
   const maquinas = useAtomValue(maquinasAtom);
   const [operarios, setOperarios] = useAtom(operariosAtom);
   const cargandoMaquinas = useAtomValue(cargandoAtom);
+  const setVemDoMRPII = useSetAtom(vemDoMRPIIAtom);
 
   // Estado para controlar los modales
   const [modalMapexAbierto, setModalMapexAbierto] = useState(false);
@@ -79,6 +81,34 @@ export default function Home() {
       setMaquinaSeleccionada(null);
     }
   }, [sesionActiva]);
+
+  // DETECTAR PARÂMETROS DA URL DO MRPII - NÃO ABRIR MODAL
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const fromMRPII = params.get('fromMRPII');
+
+    // Verificar se veio do MRPII
+    if (fromMRPII === 'true') {
+      console.log('🚀 Acesso via MRPII - Modo visualização sem modal');
+
+      // Marcar que veio do MRPII
+      setVemDoMRPII(true);
+
+      // FECHAR o modal inicial se estiver aberto
+      setSelectorInicialCerrado(true);
+      setSelectorManualAbierto(false);
+
+      // Limpar os parâmetros da URL para deixar limpa
+      if (window.history && window.history.replaceState) {
+        const cleanUrl = window.location.protocol + "//" +
+                         window.location.host +
+                         window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+  }, [setVemDoMRPII]); // Executar apenas uma vez ao montar o componente
 
   const modalSeleccionVisible =
     selectorManualAbierto || (!sesionActiva && !selectorInicialCerrado);

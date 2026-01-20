@@ -278,3 +278,6 @@ export const agregarOperarioAtom = atom(
 );
 
 export const operarioSesionAtom = atom<Operario | null>(null);
+
+// Atom para indicar se a sessão veio do MRPII (pular autenticação PIN)
+export const vemDoMRPIIAtom = atom<boolean>(false);

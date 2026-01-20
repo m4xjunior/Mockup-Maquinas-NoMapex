@@ -22,8 +22,8 @@ import {
   UserCheck,
   Info,
 } from 'lucide-react';
-import { useSetAtom } from 'jotai';
-import { operarioSesionAtom } from '@/lib/atoms/produccion';
+import { useSetAtom, useAtomValue } from 'jotai';
+import { operarioSesionAtom, vemDoMRPIIAtom } from '@/lib/atoms/produccion';
 
 interface LoginModalMaquinaProps {
   visible: boolean;
@@ -57,12 +57,12 @@ export function LoginModalMaquina({
   operarios,
 }: LoginModalMaquinaProps) {
   const [tipoProcesoSeleccionado, setTipoProcesoSeleccionado] = useState<string | null>('fabricacion');
-  const [montado, setMontado] = useState(false);
   const [mostrarPin, setMostrarPin] = useState(false);
   const [pin, setPin] = useState('');
   const [errorPin, setErrorPin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const setOperarioSesion = useSetAtom(operarioSesionAtom);
+  const vemDoMRPII = useAtomValue(vemDoMRPIIAtom);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -108,11 +108,35 @@ export function LoginModalMaquina({
   };
 
 
-  // Iniciar monitoreo - mostrar modal de PIN
+  // Iniciar monitoreo - mostrar modal de PIN ou redirecionar direto se veio do MRPII
   const handleIniciarMonitoreo = () => {
+    // Se veio do MRPII, pular PIN e redirecionar direto
+    if (vemDoMRPII) {
+      handleRedirecionarParaMRPII();
+      return;
+    }
+
+    // Caso contrário, mostrar modal de PIN
     setMostrarPin(true);
     setPin('');
     setErrorPin(false);
+  };
+
+  // Redirecionar para MRPII sem autenticação
+  const handleRedirecionarParaMRPII = () => {
+    if (!maquinaSeleccionada) return;
+
+    const maquina = maquinas.find(m => m.id === maquinaSeleccionada);
+    if (!maquina) return;
+
+    setIsSubmitting(true);
+    toast.success(`Redireccionando a ${maquina.nombre}...`);
+
+    // Redirecionar para MRPII com a máquina selecionada
+    setTimeout(() => {
+      const url = `http://10.0.0.66/mrpii/indexkhv2.html?posicion=${encodeURIComponent(maquina.nombre)}`;
+      window.location.href = url;
+    }, 500);
   };
 
   // Validar PIN y confirmar
@@ -160,10 +184,6 @@ export function LoginModalMaquina({
       toast.success('Redireccionando al sistema...');
     }, 500);
   };
-
-  useEffect(() => {
-    setMontado(true);
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
